@@ -1,0 +1,503 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>hbase orm 中间层 hbasedao | 幻影笔记</title>
+
+<link rel="shortcut icon" href="https://phantomma.xyz/favicon.ico?v=1707316916776">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://phantomma.xyz/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            幻影笔记
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://phantomma.xyz/post/guan-yu" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1707316916776"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    hbase orm 中间层 hbasedao
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2015-01-03 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="背景">背景</h1>
+<p>hbase 是分布式的 kv(key value) 存储系统，hbase 提供的针对底层数据的操作也是基于 kv 维度的，使用起来更像是Map的操作方式。但是上层业务应用一般是采用的面向对象的设计，这就导致了使用 hbase 的底层 api 必须要写很多的代码来做KV原始数据到上层业务对象的转化。</p>
+<!-- more -->
+<p>使用关系型数据库如 MySQL，也会遇到关系型数据跟对象之间的适配问题，所以出现了很多成熟的做对象关系映射的产品，像 <code>hibernate</code> 和 <code>mybatis</code>。</p>
+<p>hbase 当然也需要一个类似的东西，来做对象到 kv 数据的适配，这样上层应用可以继续专注于上层 面向对象的方式的开发，而不用直接操作kv数据，提高工作效率。</p>
+<h1 id="hbase使用场景">hbase使用场景</h1>
+<p>hbase 要解决的问题是海量数据的分布式存储，传统数据库如 mysql 解决这个问题也是有办法的，可以通过分库分表的方式做到。 所以，hbase 和 mysql 的竞争点是在需要 mysql 分库分表的情况。下面以一个很常见的场景举例，来看之前数据存储使用mysql的场景，迁移hbase上的过程。</p>
+<blockquote>
+<p>问题描述：用户的基本信息（包括：用户头像，上次登录时间），好友关系（正向 我关注的人，反向关注我的人）</p>
+</blockquote>
+<h2 id="mysql的方式">mysql的方式：</h2>
+<h3 id="用户信息表">用户信息表</h3>
+<table>
+<thead>
+<tr>
+<th>列名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>用户id</td>
+</tr>
+<tr>
+<td>head_image</td>
+<td>头像</td>
+</tr>
+<tr>
+<td>last_visit_time</td>
+<td>上次登录时间</td>
+</tr>
+</tbody>
+</table>
+<h3 id="用户关注表">用户关注表</h3>
+<table>
+<thead>
+<tr>
+<th>列名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>userId</td>
+<td>用户id</td>
+</tr>
+<tr>
+<td>follow_user</td>
+<td>关注的人</td>
+</tr>
+</tbody>
+</table>
+<h3 id="用户粉丝表">用户粉丝表</h3>
+<table>
+<thead>
+<tr>
+<th>列名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>userId</td>
+<td>用户id</td>
+</tr>
+<tr>
+<td>be_followed_user</td>
+<td>关注我的人</td>
+</tr>
+</tbody>
+</table>
+<p>之所以用户关系两张表来保存是因为，用户关系数据量比较大的情况下，采用分库分表存储的方案，又要提供正向、反向的查询，所以需要分别以关注者和被关注者为路由字段存储两份。</p>
+<h2 id="hbase的方式">hbase的方式：</h2>
+<table>
+<thead>
+<tr>
+<th>rowKey</th>
+<th>列簇</th>
+<th>列</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>userId</td>
+<td>info_cf（单version）</td>
+<td>head_image</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>last_visit_time</td>
+</tr>
+<tr>
+<td></td>
+<td>relation_cf (多个version)</td>
+<td>follow_user</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>be_followed_user</td>
+</tr>
+</tbody>
+</table>
+<p>存入 hbase 的数据的逻辑结构会是： hbase_data.png</p>
+<blockquote></blockquote>
+<p>通过上面 mysql 表到 hbase 表的迁移过程，可以清楚地看到：mysql 中 和 userId 一对一的用户基本信息迁移到 hbase 可以用无 version 特性的列簇保存；一对多的关注关系迁移到 hbase，可以利用hbase 多 version 的列簇保存。下面介绍的hbasedao中间层就会主要解决mysql迁移到 hbase 的适配，包括单 version（一对一）和多 version（一对多）的情形。<br>
+NOTE： hbase 多 version 的列簇，不同column之间没有任何对应关系，所以不要尝试在不同的 column 之间找行的对应关系。</p>
+<h1 id="hbasedao介绍">hbasedao介绍</h1>
+<p>hbasedao 是一个简单地解决kv数据到业务对象适配的中间层，类似关系型数据库orm中间层mybatis。</p>
+<p>针对于 hbase 存储结构抽象出来的类结构：<br>
+habasedao_realtion.png</p>
+<h2 id="使用">使用</h2>
+<p>封装业务对象成 DO 类，一个 rowKey 对应一个 DO 类的对象，通过指定DO类里的 column，中间层可以做到针对于指定 column 的查询。使用 hbasedao 之后，查询的方式如下：</p>
+<pre><code>public UserHBaseDO get(String rowKey) throws HBaseDAOException {
+    HBaseDO hBaseDO = new HBaseDO();
+    hBaseDO.setTableName(UserHBaseDO.TABLE_NAME);
+    hBaseDO.setRowKey(rowKey);
+    hBaseDO.addColumnFamily(UserHBaseDO.CF_NAME_info_cf)
+        .putColumn(UserHBaseDO.CL_NAME_head_image)
+        .putColumn(UserHBaseDO.CL_NAME_last_visit_time);
+    hBaseDO.addColumnFamily(UserHBaseDO.CF_NAME_relation_cf, 10)
+        .putColumn(UserHBaseDO.CL_NAME_follow_user)
+        .putColumn(UserHBaseDO.CL_NAME_be_followed_user);
+    super.getHbaseDao().get(hBaseDO);
+    UserHBaseDO userHBaseDO = null;
+    try {
+        userHBaseDO = new UserHBaseDO(hBaseDO);
+    } catch (UnsupportedEncodingException e) {
+        new HBaseDAOException(e);
+    }
+    return userHBaseDO;
+}
+</code></pre>
+<h2 id="支持的-api">支持的 API</h2>
+<ol>
+<li>以对象的方式插入数据</li>
+<li>批量插入数据</li>
+<li>传入 rowKey，查询对象。可支持针对不同的列簇指定查询的 version 数量，支持指定列簇中数据的时间范围</li>
+<li>传入多个 rowKey，查询对象的列表</li>
+<li>删除指定的 rowKey 的一行记录</li>
+<li>指定开始扫描的 rowKey，开始按行扫描数据，可以限制扫描的结果集大小</li>
+</ol>
+<pre><code>public interface HBaseDAO {
+    public void put(HBaseDO hBaseDO) throws HBaseDAOException;
+    public void putList(List&lt;HBaseDO&gt; hBaseDOList, String tableName) 
+        throws HBaseDAOException;
+    public void get(HBaseDO hBaseDO) throws HBaseDAOException;
+    public void getList(List&lt;HBaseDO&gt; hBaseDOList, String tableName) 
+        throws HBaseDAOException;
+    public void delete(HBaseDO hBaseDO) throws HBaseDAOException;
+    public List&lt;HBaseDO&gt; scan(String tableName, String startRow, String endRow, 
+        int maxVersion, int maxResultSize, Map&lt;String, List&lt;String&gt;&gt; columnFamilyMap) 
+        throws HBaseDAOException;
+}
+</code></pre>
+<h1 id="使用举例step-by-step">使用举例（step by step）</h1>
+<p>代码工程结构，sample 包里提供了详细的使用举例。可以看到，使用时只需要定义 hbase 表对应的 DO 类，在此类中编写对象和 hbase 里数据的对应关系，在 DAO 层以上就可以提供和 mybatis 类似的接口访问形式。</p>
+<pre><code>├── pom.xml
+├── src
+│   ├── main
+│   │   ├── java
+│   │   │   └── com
+│   │   │       └── taobao
+│   │   │           └── hbasedao
+│   │   │               ├── ColumnFamilyInfo.java
+│   │   │               ├── HBaseCell.java
+│   │   │               ├── HBaseClientDaoSupport.java
+│   │   │               ├── HBaseColumnFamily.java
+│   │   │               ├── HBaseConsole.java
+│   │   │               ├── HBaseDAO.java
+│   │   │               ├── HBaseDAOException.java
+│   │   │               ├── HBaseDAOFactory.java
+│   │   │               ├── HBaseDAOImpl.java
+│   │   │               ├── HBaseDO.java
+│   │   │               ├── HBaseVO.java
+│   │   │               ├── MapAble.java
+│   │   │               └── sample
+│   │   │                   ├── dao
+│   │   │                   │   └── UserHBaseDAO.java
+│   │   │                   ├── dataobject
+│   │   │                   │   └── UserHBaseDO.java
+│   │   │                   └── vo
+│   │   │                       └── FollowerVO.java
+│   │   └── resources
+│   └── test
+│       ├── java
+│       │   └── com
+│       │       └── taobao
+│       │           └── hbasedao
+│       │               └── sample
+│       │                   └── test
+│       │                       └── UserHBaseDAOTest.java
+│       └── resources
+│           └── hbase-dao.xml
+</code></pre>
+<h2 id="步骤">步骤</h2>
+<ol>
+<li>引入依赖</li>
+</ol>
+<pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;com.taobao.hbasedao&lt;/groupId&gt;
+  &lt;artifactId&gt;hbasedao&lt;/artifactId&gt;
+  &lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<ol start="2">
+<li>定义hbae表对应的DO类，相当于使用 mybati s时，定义的 sqlmap，需要给出 hbase 表的 schema 信息，如：列簇名、列名、列簇的最大 version，列簇和列的绑定关系等。</li>
+</ol>
+<pre><code>public class UserHBaseDO implements MapAble&lt;UserHBaseDO&gt; {
+    public static final String TABLE_NAME = &quot;hbasedao_user&quot;;
+    public static final String CF_NAME_info_cf = &quot;info_cf&quot;;
+    public static final int MAX_SIZE_CF_NAME_info_cf = 1;
+    public static final String CF_NAME_relation_cf = &quot;relation_cf&quot;;
+    public static final int MAX_SIZE_CF_NAME_relation_cf = 1000;
+    public static final String CL_NAME_head_image = &quot;head_image&quot;;
+    public static final String CL_NAME_last_visit_time = &quot;last_visit_time&quot;;
+    public static final String CL_NAME_follow_user = &quot;follow_user&quot;;
+    public static final String CL_NAME_be_followed_user = &quot;be_followed_user&quot;;
+    private static Map&lt;String, List&lt;String&gt;&gt; columnFamilyMap;
+    static {
+        columnFamilyMap = new HashMap&lt;String, List&lt;String&gt;&gt;();
+        columnFamilyMap.put(CF_NAME_info_cf,
+                Arrays.asList(new String[] { CL_NAME_head_image, CL_NAME_last_visit_time }));
+        columnFamilyMap.put(CF_NAME_relation_cf,
+                Arrays.asList(new String[] { CL_NAME_follow_user, CL_NAME_be_followed_user }));
+    }
+    private String rowKey;
+    private String headImage;
+    private long lastVisitTime;
+    private final List&lt;FollowerVO&gt; followVOList = new ArrayList&lt;FollowerVO&gt;();
+    private final List&lt;FollowerVO&gt; beFollowedVOList = new ArrayList&lt;FollowerVO&gt;();
+</code></pre>
+<ol start="3">
+<li>实现 MapAble 接口，MapAble 接口包括两个方法，一个是插入数据时将用户定义的 UserHBaseDO 转化为框架使用的 HBaseDO，一个是查询时将 HBaseDO 里包含的数据转为为用户定义 UserHBaseDO。</li>
+</ol>
+<pre><code>@Override
+public HBaseDO converDOToHBaseDO() {
+    HBaseDO hbaseDO = new HBaseDO();
+    hbaseDO.setRowKey(this.rowKey);
+    hbaseDO.setTableName(UserHBaseDO.TABLE_NAME);
+    for (Map.Entry&lt;String, List&lt;String&gt;&gt; columnFamilyEntry : 
+        columnFamilyMap.entrySet()) {
+        String columnFamilyName = columnFamilyEntry.getKey();
+        List&lt;String&gt; columnNameList = columnFamilyEntry.getValue();
+        HBaseColumnFamily columnFamily = new HBaseColumnFamily();
+        for (String columnName : columnNameList) {
+            if (CF_NAME_info_cf.equals(columnFamilyName) &amp;&amp; 
+                CL_NAME_head_image.equals(columnName)) {
+                if (this.headImage != null) {
+                    List&lt;HBaseCell&gt; cellDOList = new ArrayList&lt;HBaseCell&gt;();
+                    HBaseCell cellDO = new HBaseCell();
+                    cellDO.setValue(this.headImage);
+                    cellDOList.add(cellDO);
+                    columnFamily.putColumn(columnName, cellDOList);
+                }
+            }
+            ...
+        }
+        hbaseDO.getColumnFamilyMap().put(columnFamilyName, columnFamily);
+    }
+    return hbaseDO;
+}
+@Override
+public UserHBaseDO convertHBaseDOToDO(HBaseDO hBaseDO) throws UnsupportedEncodingException {
+    this.rowKey = hBaseDO.getRowKey();
+    List&lt;KeyValue&gt; results = hBaseDO.getResults();
+    for (Map.Entry&lt;String, List&lt;String&gt;&gt; columnFamilyEntry : 
+        columnFamilyMap.entrySet()) {
+        String columnFamilyName = columnFamilyEntry.getKey();
+        List&lt;String&gt; columnNameList = columnFamilyEntry.getValue();
+        for (String columnName : columnNameList) {
+            if (CF_NAME_info_cf.equals(columnFamilyName) &amp;&amp; 
+                CL_NAME_head_image.equals(columnName)) {
+                for (KeyValue kv : results) {
+                    if (columnFamilyName.equals(new String(kv.getFamily()))
+                            &amp;&amp; columnName.equals(new String(kv.getQualifier()))) {
+                        this.headImage = new String(kv.getValue(), &quot;UTF-8&quot;);
+                    }
+                }
+            }
+            ...
+        }
+    }
+    return this;
+}
+</code></pre>
+<ol start="4">
+<li>然后就是定义 DAO 类，主要的逻辑已经在 UserHBaseDO 写了，这里的实现可以足够简单，查询的代码在 hbasedao 介绍里已经给出，插入数据的代码如下：</li>
+</ol>
+<pre><code>public void insert(UserHBaseDO userHBaseDO) throws HBaseDAOException {
+    super.getHbaseDao().put(userHBaseDO.converDOToHBaseDO());
+}
+</code></pre>
+<ol start="5">
+<li>编写测试用例</li>
+</ol>
+<pre><code>@Test
+public void test_insert() throws HBaseDAOException {
+    ApplicationContext context = new ClassPathXmlApplicationContext(&quot;hbase-dao.xml&quot;);
+    UserHBaseDAO userHBaseDAO = context.getBean(&quot;userHBaseDAO&quot;, UserHBaseDAO.class);
+    UserHBaseDO userHBaseDO = new UserHBaseDO();
+    userHBaseDO.setRowKey(&quot;2222&quot;);
+    userHBaseDO.setHeadImage(&quot;icon1.jpg&quot;);
+    userHBaseDO.setLastVisitTime(4820023);
+    int i = 0;
+    FollowerVO followerVO1 = new FollowerVO(&quot;444_errik&quot;);
+    followerVO1.setTimeStamp(System.currentTimeMillis() + i++);
+    FollowerVO followerVO2 = new FollowerVO(&quot;555_wiie&quot;);
+    followerVO2.setTimeStamp(System.currentTimeMillis() + i++);
+    FollowerVO followerVO3 = new FollowerVO(&quot;666_gate&quot;);
+    followerVO3.setTimeStamp(System.currentTimeMillis() + i++);
+    userHBaseDO.getFollowVOList().add(followerVO1);
+    userHBaseDO.getFollowVOList().add(followerVO2);
+    userHBaseDO.getFollowVOList().add(followerVO3);
+    FollowerVO followerVO4 = new FollowerVO(&quot;999_hena&quot;);
+    userHBaseDO.getBeFollowedVOList().add(followerVO4);
+    userHBaseDAO.insert(userHBaseDO);
+}
+@Test
+public void test_get() throws HBaseDAOException {
+    ApplicationContext context = new ClassPathXmlApplicationContext(&quot;hbase-dao.xml&quot;);
+    UserHBaseDAO userHBaseDAO = context.getBean(&quot;userHBaseDAO&quot;, UserHBaseDAO.class);
+    UserHBaseDO userHBaseDO = userHBaseDAO.get(&quot;2222&quot;);
+    System.out.println(userHBaseDO);
+}
+</code></pre>
+<p>完整地代码示例请参考 <code>com.taobao.hbasedao.sample</code> 代码工程在：hbasedao</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://phantomma.xyz/post/canal-yuan-ma-zou-du/" class="post-title gt-a-link">
+                    Canal 源码走读
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/PhantomMaa" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://phantomma.xyz/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
