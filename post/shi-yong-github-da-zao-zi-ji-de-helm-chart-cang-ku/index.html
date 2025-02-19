@@ -1,0 +1,235 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>使用 github 打造自己的 helm 仓库 | 幻影笔记</title>
+
+<link rel="shortcut icon" href="https://www.phantomma.top/favicon.ico?v=1739946649910">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.phantomma.top/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            幻影笔记
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://phantomma.xyz/post/guan-yu" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1739946649910"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    使用 github 打造自己的 helm 仓库
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2023-02-14 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p>云原生 k8s 的用户，经常会在某个开源软件的基础上封装成 helm chart 部署到 k8s。只是一个人本地开发，可以完全使用本地的模式，如：<code>helm install my-app ../custom-charts/my-app</code>。<br>
+更进一步，多台设备，或者多人协作的情况下，就需要一个远程的 helm 仓库，保存自己自定义的各种 chart。</p>
+<!-- more -->
+<p>低成本（最好免费）的远程仓库，可选的也有很多，如 腾讯 coding。但，最合适的，还是莫过于 github。通过 <code>Github Action</code> 可以更好的做到自动化。</p>
+<p>本文就介绍如何使用 github 打造自己的 helm chart 仓库。</p>
+<h2 id="主要原理">主要原理</h2>
+<ul>
+<li>GitHub 提供两种静态 web 页面，可以利用这个能力，打造自己的 helm chart 仓库
+<ol>
+<li>通过某一目录配置项目</li>
+<li>通过特定的分支配置项目</li>
+</ol>
+</li>
+<li><code>Github Action</code> 监听代码的提交，自动打包成 helm chart，发布到 <code>Release</code>，实现 <code>.tar.gz</code> 包的下载</li>
+<li>遵守 Helm 仓库的协议，生成 helm index.yaml 文件</li>
+</ul>
+<h2 id="步骤">步骤</h2>
+<h3 id="创建-charts-仓库">创建 <code>charts</code> 仓库</h3>
+<p>创建公开仓库，仓库命名不限定。</p>
+<h3 id="创建的-gh-pages-分支">创建的 gh-pages 分支</h3>
+<pre><code class="language-bash">git checkout -b gh-pages
+</code></pre>
+<h3 id="设置-page">设置 <code>Page</code></h3>
+<p><code>Source</code> 选择 <code>Deploy from a branch</code>。分支选择刚刚创建的 <code>gh-pages</code>，路径为 <code>/(root)</code>。<br>
+<img src="https://www.phantomma.top/post-images/1739437176199.png" alt="" loading="lazy"></p>
+<h3 id="提交仓库代码">提交仓库代码</h3>
+<h4 id="结构路径如下charts-文件夹统一存放多个-chart">结构路径如下，<code>charts</code> 文件夹统一存放多个 <code>chart</code>。</h4>
+<pre><code class="language-bash">❯ tree -L 2
+.
+├── LICENSE
+├── README.md
+├── README_zh-CN.md
+└── charts
+    ├── blinko
+    ├── grafana-stack
+    ├── keycloak
+    ├── my-traefik
+    └── umami
+</code></pre>
+<h4 id="github-action-workflow-的编写"><code>Github Action</code> workflow 的编写</h4>
+<p>参考 helm 官方给的文档：https://helm.sh/zh/docs/howto/chart_releaser_action/</p>
+<p>对于有子 <code>chart</code> 的情况，还需要新增一个 job：</p>
+<pre><code class="language-yaml">- name: Update Helm Dependencies
+        run: |
+          helm repo add traefik https://traefik.github.io/charts
+          helm repo add jetstack https://charts.jetstack.io
+
+          for dir in $(ls -d charts/*); do
+            helm dependency update $dir;
+          done
+</code></pre>
+<h3 id="提交代码-触发-action">提交代码 触发 <code>Action</code></h3>
+<figure data-type="image" tabindex="1"><img src="https://www.phantomma.top/post-images/1739437567486.png" alt="" loading="lazy"></figure>
+<h2 id="效果">效果</h2>
+<p>效果如 Traefik 的 github 仓库：https://traefik.github.io/charts<br>
+<img src="https://www.phantomma.top/post-images/1739437647272.png" alt="" loading="lazy"></p>
+<p>就可以通过 <code>helm repo add</code> 使用仓库了。</p>
+<pre><code class="language-bash">helm repo add phantom-lab https://phantommaa.github.io/charts
+helm repo update
+</code></pre>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://www.phantomma.top/post/shi-yong-orbstack-an-zhuang-chang-yong-yi-lai/" class="post-title gt-a-link">
+                    使用 OrbStack 容器里安装常用软件
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/PhantomMaa" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+<script async defer src="https://tianji.wcai.app/tracker.js" data-website-id="cm71v6t22000110fewgu5ysls"></script>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://www.phantomma.top/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

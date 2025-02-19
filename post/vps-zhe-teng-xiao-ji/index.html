@@ -1,0 +1,206 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>vps 折腾小记 | 幻影笔记</title>
+
+<link rel="shortcut icon" href="https://www.phantomma.top/favicon.ico?v=1739946649910">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.phantomma.top/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            幻影笔记
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://phantomma.xyz/post/guan-yu" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1739946649910"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    vps 折腾小记
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2015-02-01 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="购买vps">购买vps</h1>
+<p>使用的是俄罗斯的vps厂商：justhost，它的定价是最有性价比的一档。最便宜的俄罗斯区域的，120多人民币一年。一开始选择的俄罗斯region，不过流媒体对俄罗斯ip是封禁的。最后还是换成美西😓，价格也变成了360¥一年。</p>
+<!-- more -->
+<p>美西LOS，ping的延迟在150ms</p>
+<pre><code class="language-bash">PING 155.254.193.168 (155.254.193.168): 56 data bytes
+64 bytes from 155.254.193.168: icmp_seq=0 ttl=52 time=154.847 ms
+64 bytes from 155.254.193.168: icmp_seq=1 ttl=52 time=177.327 ms
+64 bytes from 155.254.193.168: icmp_seq=2 ttl=52 time=153.530 ms
+64 bytes from 155.254.193.168: icmp_seq=3 ttl=52 time=151.163 ms
+</code></pre>
+<p><a href="https://justhost.asia/">https://justhost.asia/</a></p>
+<h1 id="申请域名">申请域名</h1>
+<p>域名丛<a href="https://freenom.com/">https://freenom.com/</a> 申请的免费域名。<br>
+可以将域名的解析服务设置到国内的dnspod。</p>
+<h1 id="一键安装v2ray脚本">一键安装v2ray脚本</h1>
+<p>域名搞定以后，可以在主机上一键安装服务端 <a href="https://github.com/wulabing/V2Ray_ws-tls_bash_onekey">https://github.com/wulabing/V2Ray_ws-tls_bash_onekey</a></p>
+<blockquote>
+<p>vmess://ewogICJ2IjogIjIiLAogICJwcyI6ICJ3dWxhYmluZ19jcm9zcy5waGFudG9tbWEudGsiLAogICJhZGQiOiAiY3Jvc3MucGhhbnRvbW1hLnRrIiwKICAicG9ydCI6ICI0NDMiLAogICJpZCI6ICI4NmNiYjU0Mi1iYzRkLTQwYTMtYmQzOS1hNWM2OTkzOGE1NTQiLAogICJhaWQiOiAiMCIsCiAgIm5ldCI6ICJ3cyIsCiAgInR5cGUiOiAibm9uZSIsCiAgImhvc3QiOiAiY3Jvc3MucGhhbnRvbW1hLnRrIiwKICAicGF0aCI6ICIvMWJjODgvIiwKICAidGxzIjogInRscyIKfQo=</p>
+</blockquote>
+<h1 id="加速tcp">加速tcp</h1>
+<p>压缩加速tcp的连接<br>
+<a href="https://github.com/tcp-nanqinlang/wiki/wiki/general">https://github.com/tcp-nanqinlang/wiki/wiki/general</a></p>
+<h1 id="配置软路由科学上网插件">配置软路由科学上网插件</h1>
+<ul class="contains-task-list">
+<li class="task-list-item"><input class="task-list-item-checkbox" disabled="" type="checkbox" id="task-item-5774054"><label class="task-list-item-label" for="task-item-5774054"> bypass</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-8757512"><label class="task-list-item-label" for="task-item-8757512"> luci-app-ssr-plus （额外多了 DNS防污染服务）</label></li>
+</ul>
+<h1 id="other">other</h1>
+<ul>
+<li>查看流媒体网站对该vps的支持情况。<a href="https://www.vpsgo.com/vps-ip-regionrestrictioncheck.html">https://www.vpsgo.com/vps-ip-regionrestrictioncheck.html</a></li>
+</ul>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://www.phantomma.top/post/hbase-orm-zhong-jian-ceng-hbasedao/" class="post-title gt-a-link">
+                    hbase orm 中间层 hbasedao
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/PhantomMaa" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+<script async defer src="https://tianji.wcai.app/tracker.js" data-website-id="cm71v6t22000110fewgu5ysls"></script>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://www.phantomma.top/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

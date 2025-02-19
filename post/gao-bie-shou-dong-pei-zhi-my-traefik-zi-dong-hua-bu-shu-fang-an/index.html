@@ -1,0 +1,300 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>告别手动配置！My-Traefik 自动化部署方案 | 幻影笔记</title>
+
+<link rel="shortcut icon" href="https://www.phantomma.top/favicon.ico?v=1739946649910">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.phantomma.top/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            幻影笔记
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://phantomma.xyz/post/guan-yu" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1739946649910"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    告别手动配置！My-Traefik 自动化部署方案
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2024-02-15 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p>作为个人开发者，你是否也经历过这些烦恼？</p>
+<ul>
+<li>每次部署新服务都要手动配置 SSL 证书</li>
+<li>不同环境的域名证书需要重复申请</li>
+<li>在多个命名空间之间同步证书导致配置混乱</li>
+<li>证书过期忘记续期导致服务中断</li>
+</ul>
+<!-- more -->
+<p>这就是我开发这个 <strong>Traefik 自动化部署方案</strong> 的初衷。下面通过一个真实场景，带你体验自动化带来的改变。</p>
+<hr>
+<h2 id="传统方案-vs-自动化方案">传统方案 vs 自动化方案</h2>
+<p>假设我们要部署一个个人博客系统：</p>
+<h3 id="传统做法手动配置">传统做法（手动配置）</h3>
+<ol>
+<li>申请域名：blog.example.com</li>
+<li>登录 Cloudflare 控制台配置 DNS</li>
+<li>手动生成 Let's Encrypt 证书</li>
+<li>创建 Kubernetes Secret 存储证书</li>
+<li>配置 Ingress 规则</li>
+<li>每 90 天重复步骤 3-5</li>
+</ol>
+<h3 id="使用本方案">使用本方案</h3>
+<pre><code class="language-bash"># 1. 配置 values.yaml
+cat &lt;&lt;EOF &gt; values.yaml
+config:
+  domain: example.com
+  https:
+    enabled: true
+    cloudflareApiToken: $CLOUDFLARE_TOKEN
+    email: me@example.com
+EOF
+
+# 2. 一键部署
+helm install my-traefik ./my-traefik -f values.yaml
+
+# 3. 完成！后续所有 *.example.com 的子域名自动获得证书
+</code></pre>
+<hr>
+<h2 id="方案核心优势">方案核心优势</h2>
+<h3 id="一劳永逸的证书管理">🌟 一劳永逸的证书管理</h3>
+<ul>
+<li>自动签发通配符证书（支持 *.example.com）</li>
+<li>证书到期前自动续期</li>
+<li>多子域名无需重复配置</li>
+</ul>
+<pre><code class="language-yaml"># 自动生成的证书配置样例
+apiVersion: cert-manager.io/v1
+kind: Certificate
+spec:
+  commonName: &quot;*.example.com&quot;  # 通配符域名
+  dnsNames: [&quot;*.example.com&quot;] # 覆盖所有子域名
+</code></pre>
+<h3 id="跨命名空间支持">🚀 跨命名空间支持</h3>
+<p>当你的项目扩展到多个环境时：</p>
+<pre><code class="language-yaml">traefik:
+  providers:
+    kubernetesCRD:
+      namespaces:
+        - blog      # 博客系统
+        - dashboard # 监控面板
+        - api       # 后端服务
+</code></pre>
+<p>所有命名空间自动获得统一的证书管理，无需逐个配置。</p>
+<hr>
+<h2 id="快速入门指南">快速入门指南</h2>
+<h3 id="第一步准备-cloudflare-token">第一步：准备 Cloudflare Token</h3>
+<ol>
+<li>登录 Cloudflare 控制台</li>
+<li>进入「API 令牌」页面</li>
+<li>创建具有 <strong>DNS 编辑权限</strong> 的令牌</li>
+</ol>
+<h3 id="第二步部署方案">第二步：部署方案</h3>
+<pre><code class="language-bash"># 克隆仓库
+git clone https://github.com/your-repo/my-traefik.git
+cd my-traefik
+
+# 创建配置文件（记得替换实际参数）
+echo &quot;config:
+  domain: mydevblog.com
+  https:
+    enabled: true
+    cloudflareApiToken: YOUR_TOKEN
+    email: your@email.com&quot; &gt; config.yaml
+
+# 执行部署
+helm install traefik . -f config.yaml
+</code></pre>
+<h3 id="第三步验证部署">第三步：验证部署</h3>
+<p>检查自动生成的证书：</p>
+<pre><code class="language-bash">kubectl get certificate -A
+</code></pre>
+<p>应该看到类似输出：</p>
+<pre><code class="language-javascript">NAMESPACE   NAME                   READY   SECRET                 AGE
+default     wildcard-tls-certificate True    wildcard-tls-certificate   5m
+</code></pre>
+<hr>
+<h2 id="进阶功能体验">进阶功能体验</h2>
+<h3 id="为管理后台添加基础认证">为管理后台添加基础认证</h3>
+<pre><code class="language-yaml"># 启用认证
+config:
+  auth:
+    enabled: true
+    username: admin
+    password: securepassword
+
+# 生成后的 Secret 会自动挂载到 Traefik
+</code></pre>
+<p>访问服务时就会看到认证弹窗，有效防止未授权访问。</p>
+<hr>
+<h2 id="项目带来的改变">项目带来的改变</h2>
+<p>自从使用这个自动化方案后：</p>
+<ul>
+<li>部署新服务时间从 <strong>1小时</strong> 缩短到 <strong>5分钟</strong></li>
+<li>证书相关运维工作减少 <strong>90%</strong></li>
+<li>再没有因证书过期导致的故障</li>
+</ul>
+<hr>
+<h2 id="开源之约">开源之约</h2>
+<p>这个项目已在 GitHub 开源，欢迎开发者们：</p>
+<ul>
+<li>⭐️ 收藏项目仓库</li>
+<li>🐛 提交 Issue 反馈问题</li>
+<li>💻 发起 PR 贡献代码</li>
+</ul>
+<p>项目地址：<a href="https://github.com/PhantomMaa/charts/tree/main/charts/my-traefik">my-traefik</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://www.phantomma.top/post/ollama-mo-xing-de-chi-xian-qian-yi-fu-zhi/" class="post-title gt-a-link">
+                    Ollama 模型的离线迁移/复制
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/PhantomMaa" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+<script async defer src="https://tianji.wcai.app/tracker.js" data-website-id="cm71v6t22000110fewgu5ysls"></script>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://www.phantomma.top/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
