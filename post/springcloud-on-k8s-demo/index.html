@@ -1,0 +1,271 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>SpringCloud On K8s Demo | 幻影笔记</title>
+
+<link rel="shortcut icon" href="https://phantomma.top/favicon.ico?v=1749526134625">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://phantomma.top/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            幻影笔记
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://phantomma.xyz/post/guan-yu" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1749526134625"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    SpringCloud On K8s Demo
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2018-12-12 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p>主要参考spring-cloud-kubernetes，它是springcloud官方推出的开源项目，用于将Spring Cloud和Spring Boot应用运行在kubernetes环境。并结合fabric8 maven插件，做到CI，自动部署到k8s环境。</p>
+<h3 id="部署结构">部署结构</h3>
+<figure data-type="image" tabindex="1"><img src="https://phantomma.top/post-images/1701435774998.png" alt="" loading="lazy"></figure>
+<h3 id="demo工程结构">Demo工程结构</h3>
+<pre><code class="language-bash">~/projects/SpringCloudOnK8sDemo &gt; tree -L 1
+.
+├── backend-hello
+├── backend-login
+├── eureka
+├── gateway-eureka
+└── gateway-k8s
+</code></pre>
+<ul>
+<li><a href="http://eureak.c066372bb24a34c35a2050758bc67bb9e.cn-hangzhou.alicontainer.com">eureka服务注册中心</a><br>
+<img src="https://phantomma.top/post-images/1701435795080.png" alt="" loading="lazy"></li>
+</ul>
+<blockquote>
+<p>一个gateway，两个后端服务</p>
+</blockquote>
+<h3 id="服务发现机制">服务发现机制</h3>
+<p>基于k8s可以有两种服务机制：</p>
+<ol>
+<li>
+<p>SpringCloud eureka<br>
+<img src="https://phantomma.top/post-images/1701435808134.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>k8s api server<br>
+<img src="https://phantomma.top/post-images/1701435818620.png" alt="" loading="lazy"></p>
+</li>
+</ol>
+<blockquote>
+<p>他们分别提供了生态内的相关能力，都有类似如：灰度发布、容量分配、熔断、降级等基础能力。但考虑专有云是天基底座，可能没有k8s，避免依赖k8s，可以脱离其运行，内置SpringCloud是一种更架构独立、减小绑定的选择。</p>
+</blockquote>
+<h3 id="服务路由">服务路由</h3>
+<p>在gateway中，通过uri中route前缀判断是需要做服务路由的请求<br>
+<img src="https://phantomma.top/post-images/1701435833792.png" alt="" loading="lazy"></p>
+<ul>
+<li>例如这几个示例：
+<ul>
+<li>访问gateway：<a href="http://gateway-eureka.c066372bb24a34c35a2050758bc67bb9e.cn-hangzhou.alicontainer.com/hostName">http://gateway-eureka.c066372bb24a34c35a2050758bc67bb9e.cn-hangzhou.alicontainer.com/hostName</a></li>
+<li>通过服务路由访问hello服务：<a href="http://gateway-eureka.c066372bb24a34c35a2050758bc67bb9e.cn-hangzhou.alicontainer.com/route/hello/hostName">http://gateway-eureka.c066372bb24a34c35a2050758bc67bb9e.cn-hangzhou.alicontainer.com/route/hello/hostName</a></li>
+<li>通过服务路由访问login服务：<a href="http://gateway-eureka.c066372bb24a34c35a2050758bc67bb9e.cn-hangzhou.alicontainer.com/route/hello/hostName">http://gateway-eureka.c066372bb24a34c35a2050758bc67bb9e.cn-hangzhou.alicontainer.com/route/login/hostName</a></li>
+<li>服务间调用hello调login：<a href="http://gateway-eureka.c066372bb24a34c35a2050758bc67bb9e.cn-hangzhou.alicontainer.com/route/hello/list">http://gateway-eureka.c066372bb24a34c35a2050758bc67bb9e.cn-hangzhou.alicontainer.com/route/hello/list</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="负载均衡">负载均衡</h3>
+<p>Ribbon简单来说 是一个基于 HTTP 和 TCP 客户端的负载均衡器，它可以在客户端配置 ribbonServerList（服务端列表），然后轮询请求以实现均衡负载。<br>
+Feign是一个使用起来更加方便的 HTTP 客户端，使用起来就像是调用自身工程的方法，而感觉不到是调用远程方法，达到类rpc调用的效果。</p>
+<blockquote>
+<p>Ribbon和Feign可以封装组合使用（Feign封装了Ribbon）。</p>
+</blockquote>
+<ul>
+<li>
+<p>使用Ribbon客户端调用http接口，具有客户端负载均衡的能力<br>
+<img src="https://phantomma.top/post-images/1701435859571.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>使用Feign做到类rpc调用<br>
+<img src="https://phantomma.top/post-images/1701435872404.png" alt="" loading="lazy"><br>
+<img src="https://phantomma.top/post-images/1701435880127.png" alt="" loading="lazy"></p>
+</li>
+</ul>
+<h3 id="基于http做到类rpc调用的异常机制">基于http做到类rpc调用的异常机制</h3>
+<figure data-type="image" tabindex="2"><img src="https://phantomma.top/post-images/1701435895362.png" alt="" loading="lazy"></figure>
+<h3 id="隔离">隔离</h3>
+<ul>
+<li>hystrix熔断器，负载服务故障的隔离。</li>
+<li>RestTemplate --&gt; Ribbon --&gt; hystrix</li>
+</ul>
+<h3 id="traceid的透传">traceId的透传</h3>
+<ul>
+<li>结合EagleEye.getTraceId()获得traceId</li>
+<li>对于EagleEye，traceId是放ThreadLocal。基于SpringCloud http的方式，可以http header。在http header中透传<br>
+<img src="https://phantomma.top/post-images/1701435924871.png" alt="" loading="lazy"></li>
+</ul>
+<h3 id="全链路跟踪轻量鹰眼">全链路跟踪（轻量鹰眼）</h3>
+<p><img src="https://phantomma.top/post-images/1701435935143.png" alt="" loading="lazy"><br>
+使用鹰眼生成全局唯一traceId，以及traceId机制。每台日志对请求打点，然后结合ELK，做到日志全链路查询<br>
+<img src="https://phantomma.top/post-images/1701435944046.png" alt="" loading="lazy"></p>
+<h3 id="灰度">灰度</h3>
+<h4 id="灰度发布">灰度发布</h4>
+<p>依赖k8s的内置支持</p>
+<h4 id="流量灰度">流量灰度</h4>
+<ul>
+<li>AB测试</li>
+<li>对用户打标，内测发布</li>
+<li>beta发布</li>
+</ul>
+<h3 id="开发方式">开发方式</h3>
+<h4 id="使用fabric8-maven插件完成-打包-上传-部署">使用fabric8 maven插件完成 打包、上传、部署</h4>
+<pre><code class="language-bash">mvn clean package fabric8:build -Pdev	// 指定环境变量，打包docker镜像
+docker tag xxx registry.cn-hangzhou.aliyuncs.com/cmp-poc/xxx	// 重命名docker镜像
+docker push registry.cn-hangzhou.aliyuncs.com/cmp-poc/xxx		// push到私有仓库
+mvn fabric8:deploy	// 使用kubectl create depoly &amp; service
+</code></pre>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://phantomma.top/post/kotlin-kuai-su-liu-lan/" class="post-title gt-a-link">
+                    kotlin 快速浏览
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/PhantomMaa" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <script async defer src="https://tianji.phantom-lab.top/tracker.js" data-website-id="cmbpyo8l2006qjtlrb00mtn00"></script>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://phantomma.top/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

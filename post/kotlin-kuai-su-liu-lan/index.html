@@ -1,0 +1,350 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>kotlin 快速浏览 | 幻影笔记</title>
+
+<link rel="shortcut icon" href="https://phantomma.top/favicon.ico?v=1749526134625">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://phantomma.top/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            幻影笔记
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://phantomma.xyz/post/guan-yu" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1749526134625"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    kotlin 快速浏览
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2018-12-01 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h3 id="kotlin是啥">Kotlin是啥</h3>
+<p>Kotlin是一门JVM上的，与Java完美互操作，简洁、易读、安全、通用为设计目标，同时支持面向对象和函数式两种编程范式，高质量的现代静态类型语言。或者换一句话，是集成了Java（面向对象，强大生态），C#（美妙的扩展方法），Ruby（魔法般的Code Block），Scala（函数式编程，克制的运算符重载，易用版Trait）等众多语言优点的高性能的美妙语言。</p>
+<h3 id="kotlin简历">Kotlin「简历」</h3>
+<ul>
+<li>来自于著名的IntelliJ IDEA的软件开发公司 JetBrains (位于东欧捷克)</li>
+<li>起源来自 JetBrains 的圣彼得堡团队，名称取自圣彼得堡附近的一个小岛 (Kotlin Island)</li>
+<li>一种基于 JVM 的静态类型编程语言</li>
+</ul>
+<h3 id="增长情况">增长情况</h3>
+<figure data-type="image" tabindex="1"><img src="https://phantomma.top/post-images/1701435017011.png" alt="" loading="lazy"></figure>
+<h3 id="有啥亮点">有啥亮点</h3>
+<h4 id="安身立命之本-互操作性和java生态">安身立命之本--互操作性和Java生态</h4>
+<ul>
+<li>无缝引入到现有java项目</li>
+<li>java -&gt; kotlin ✔️</li>
+<li>kotlin -&gt; java ✔️</li>
+</ul>
+<h4 id="安卓阵营的拯救者">安卓阵营的拯救者</h4>
+<ul>
+<li>谷歌和Oracle的Java侵权案</li>
+<li>安卓Dalvik虚拟机智能使用jdk7以下api</li>
+<li>kotlin被谷歌钦定官方推荐语言</li>
+</ul>
+<h4 id="编写更安全-易读的代码">编写更安全、易读的代码</h4>
+<pre><code>var a: String = “abc”; // 定义个一个非null的字符串变量a
+a = null; // 编译直接失败
+
+var b: String? = “abc”; // 定义一个可为null的字符串变量b
+b = null; // 编译通过
+
+val l = b.length; // 编译失败，因为b可能为null
+l = b?.length ?: -1 // 如b为null，就返回-1
+l = b?.length; // 如b为null，就返回null
+l = b!!.length; // 如b为null，就会直接抛NPE错误
+b?.let { println(b) } // 如b为null，就不执行let后面的代码块
+
+val nullableList: List&lt;Int?&gt; = listOf(1, 2, null, 4)
+val intList: List&lt;Int&gt; = nullableList.filterNotNull() // 过滤出列表中所有不为null的数据，组成新的队列intList
+
+// 可以通过lateinit var(不可为val)，定义一个无需在申明时初始化的non-nullable的参数，这个参数不允许被赋值为空，并且在调用时如果没有初始化会抛异常
+lateinit var lateInitValue : String
+
+// 通过by lazy { ... } 表达式，让所定义的参数在第一次访问(get)的时候执行{...}这段代码块，并赋值
+val lazyValue: String by lazy {
+  doAnything()
+  &quot;build lazy value&quot;
+}
+
+// 可以直接在赋值中使用表达式，甚至内嵌执行语句
+val max = if (a &gt; b) a else b	// 三元表达式
+val max = if (a &gt; b) {
+    print(&quot;Choose a&quot;)
+    a
+} else {
+    print(&quot;Choose b&quot;)
+    b
+}
+
+// 支持when的表达式
+println(when (language) {
+    &quot;EN&quot; -&gt; &quot;Hello!&quot;
+    &quot;FR&quot; -&gt; &quot;Salut!&quot;
+    else -&gt; &quot;Sorry, I can't greet you in $language yet&quot;
+})
+
+// 支持in，表达在一定的范围内作为条件
+when (x) {
+    in 1..10 -&gt; print(&quot;x is in the range&quot;)
+    in validNumberArray -&gt; print(&quot;x is valid&quot;)
+    else -&gt; print(&quot;none of the above&quot;)
+}
+</code></pre>
+<h4 id="数据类">数据类</h4>
+<p>一行代码搞定 pojo, 自动生成 get/set/toString, 类似 lombok 插件</p>
+<pre><code>data class User(val name: String, val age: Int)
+</code></pre>
+<h4 id="更好用的函数式编程">更好用的函数式编程</h4>
+<ul>
+<li>原生支持的不可变对象</li>
+<li>更好用的lambda表达式，且性能更高（提升30%）</li>
+<li>比jdk8 stream api更好用的集合操作</li>
+</ul>
+<pre><code>val numbers = arrayListOf(-42, 17, 13, -9, 12) //创建一个List，并给定值
+val nonNegative = numbers.filter { it &gt;= 0 } //从numbers中过滤出&gt;=0的队列
+
+listOf(1, 2, 3, 4) // 列出 1, 2, 3, 4
+.map { it * 10 } // 所有值乘以10 10, 20, 30, 40
+.filter { it &gt; 20 } // 过滤出&gt;20的值 30, 40
+.forEach { print(it) } // 打印出每个值 30, 40
+</code></pre>
+<h4 id="非受检异常">非受检异常</h4>
+<p>unchecked exception，可以自己决定在调用栈的某一层 catch 和处理，不必到处 try-catch</p>
+<h4 id="字符串模板">字符串模板</h4>
+<pre><code>val s = &quot;abc&quot;
+val str = &quot;$s.length is ${s.length}&quot; // 结果为 &quot;abc.length is 3&quot;
+
+val x = 4
+val y = 7
+print(&quot;sum of $x and $y is ${x + y}&quot;)  // sum of 4 and 7 is 11
+</code></pre>
+<p>类似一个更智能、更易读的Java版本的String.format()</p>
+<h4 id="类扩展">类扩展</h4>
+<pre><code>fun MutableList&lt;Int&gt;.swap(index1: Int, index2: Int) { 
+    val tmp = this[index1] // 'this' 对应该列表 
+    this[index1] = this[index2]
+    this[index2] = tmp
+    }
+}
+//使用
+val l = mutableListOf(1, 2, 3)
+l.swap(0, 2) // 'swap()' 内部的 'this' 得到 'l' 的值
+</code></pre>
+<h4 id="免费的午餐-性能无损">免费的午餐--性能无损</h4>
+<p>Kotlin增加特性的同时，没有降低性能，部分benchmark中相比java还有微弱的性能提升，马儿跑得更快还吃的更少。<br /><br>
+<a href="https://blog.dreamtobe.cn/kotlin-performance">Kotlin运行时性能</a></p>
+<h4 id="dsl去敌人的地盘吃鸡">DSL——去敌人的地盘吃鸡</h4>
+<p>Kotlin因为其灵活的语法（比如可以重定义运算符），适合用来写DSL，比如：用Kotlin写HTML模板，anko 安卓绑定控件类库。</p>
+<h3 id="kotlin协程">kotlin协程</h3>
+<figure data-type="image" tabindex="2"><img src="https://phantomma.top/post-images/1701435043080.png" alt="" loading="lazy"></figure>
+<ul>
+<li>kotlin 1.3发布了稳定版的协程</li>
+<li>让原本需要异步+回调的才能获得高性能的场景，可以通过使用看似同步的方式来编写代码</li>
+<li>java平台上，在loom项目推出之前，最容易体验到协程遍历的途径</li>
+</ul>
+<p>Coroutine的四大金刚操作：launch, runBlocking, async和await。</p>
+<ul>
+<li>launch。launch最简单，只负责启动，启动完就不管了，既不等待结束，也不关心结果。</li>
+<li>runBlocking。runBlocking在运行代码块之后会阻塞当前coroutine，直到代码块运行完成，然后获取结果。</li>
+<li>async和await。launch和runBlocking都相对简单，如果我要启动coroutine，然后立马返回，但是又想关心结果怎么办呢，用async。async会返回一个Deferred，T是结果类型，然后你可以做别的，需要的时候，用Deferred上的await()函数来等待结果。注意await()本身也是suspend函数，你需要把它放在coroutine里面（launch，runBlocking，async调用的代码块）里面，或者将代码所在的函数标为suspend。</li>
+</ul>
+<p>四大金刚操作的比较：<br>
+<img src="https://phantomma.top/post-images/1701435244219.png" alt="" loading="lazy"></p>
+<h3 id="回调-vs-响应式编程-vs-协程">回调 vs 响应式编程 vs 协程</h3>
+<ul>
+<li>node.js</li>
+<li>reactive</li>
+<li>coroutine</li>
+</ul>
+<h3 id="如何在项目中使用kotlin">如何在项目中使用kotlin</h3>
+<ul>
+<li>idea（或eclipse）较新的版本+kotlin插件</li>
+<li>添加kotlin依赖</li>
+</ul>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.jetbrains.kotlin&lt;/groupId&gt;
+    &lt;artifactId&gt;kotlin-stdlib-jdk8&lt;/artifactId&gt;
+    &lt;version&gt;${kotlin.version}&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<ul>
+<li>混合编程<br>
+<img src="https://phantomma.top/post-images/1701435076535.png" alt="" loading="lazy"></li>
+</ul>
+<h3 id="现阶段的不足">现阶段的不足</h3>
+<ul>
+<li>ide代码提示还会有些卡顿</li>
+<li>与lombok不兼容（看不到lombok增强后的方法）</li>
+</ul>
+<h3 id="相关资料">相关资料</h3>
+<ul>
+<li><a href="https://www.kotlincn.net/docs/reference/basic-syntax.html">基本语法</a></li>
+<li><a href="https://www.kotlincn.net/docs/reference/idioms.html">习惯用法</a></li>
+<li><a href="https://www.kotlincn.net/docs/reference/java-interop.html">与java互操作</a></li>
+<li><a href="https://blog.csdn.net/lj402159806/article/details/82689122">kotlin与java语法对比</a></li>
+<li><a href="https://pusher.com/state-of-kotlin#journey">kotlin增长报告</a></li>
+</ul>
+<h2 id="代码review">代码review</h2>
+<ul>
+<li>正反向关系表同步，逆向表查询索引，根据id回主表查询。（新加坡vpc有精卫环境）</li>
+<li>lombok标记Data类，另外可选kotlin的data对象</li>
+<li>使用pandora boot。定制了一个消费多个topic的MultiMetaqListener</li>
+<li>jdk8新特性，stream</li>
+<li>kotlin混合编程</li>
+<li><a href="https://yuque.antfin-inc.com/nm6kn8/proj_z/binl02">改良版geo hash简单介绍</a></li>
+<li>lwp、hsf接口测试方案</li>
+</ul>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://phantomma.top/post/ge-ren-xiao-lu-ti-sheng-gong-ju-mac/" class="post-title gt-a-link">
+                    个人效率提升工具（Mac）
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/PhantomMaa" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <script async defer src="https://tianji.phantom-lab.top/tracker.js" data-website-id="cmbpyo8l2006qjtlrb00mtn00"></script>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://phantomma.top/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

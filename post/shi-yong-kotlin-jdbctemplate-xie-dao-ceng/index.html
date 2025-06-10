@@ -1,0 +1,317 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>使用 kotlin + jdbcTemplate 写 dao 层 | 幻影笔记</title>
+
+<link rel="shortcut icon" href="https://phantomma.top/favicon.ico?v=1749526134625">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://phantomma.top/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            幻影笔记
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://phantomma.xyz/post/guan-yu" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1749526134625"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    使用 kotlin + jdbcTemplate 写 dao 层
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2019-01-10 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h3 id="类orm的方案">类orm的方案</h3>
+<p>编写dal层代码，java领域比较火的两个阵营：JPA(Hibernate)和MyBatis。JPA是java制定的一种ORM规范；MyBatis较轻量，还需要开发人员理解sql。<br>
+国内的情况，mybatis会更流行一些。能够胜出的点，大概是因为：可定制性更强，更易于进行性能优化。<br>
+但是，mybatis用久了，需要不断修改xml，又引起了很多人的不爽。随后基于mybatis之上的工具，如mybatis-plus，tk.mybatis便被提出来。使用lambda的函数，替代动态xml模板。<br>
+同时，采用类似做法的也有很多其他语言的框架，比如kotlin的Exposed、ktorm，golang的gorm。</p>
+<p>简单介绍下这几个框架的用法：</p>
+<ul>
+<li>mybatis-plus和tk.mybatis比较类似，使用lambda函数描述sql中的一些语法含义，替代了mybatis的动态xml模板层<br>
+<img src="https://phantomma.top/post-images/1701435481669.png" alt="" loading="lazy"></li>
+<li>Exposed和ktorm，kotlin写的，和上面两个比较像。一个比较明显区别，没有基于mybatis<br>
+<img src="https://phantomma.top/post-images/1701435488764.png" alt="" loading="lazy"></li>
+</ul>
+<h3 id="spring-jdbc">spring jdbc</h3>
+<p>除了上面类orm的框架，还有spring提供的jdbcTemplate，对JDBC进行简单的封装，提供了数据层操作最基本的一些能力，诸如：动态数据源、返回结果到java对象的映射等。<br>
+spring jdbc的用法，没有动态xml，需要在java代码里手写sql。sql一长，换行拼接的方式，又非常不具有可读性。所以，被大规模正式地使用的情况，还是比较少。<br>
+所有，在github也有类似spring-data-mybatis-mini的小工具，基于spring jdbc + mybatis的xml动态模板，实现动态sql的能力。</p>
+<p><strong>那么，在上面两种方式之外，有没有一种中间路径，比orm更轻，比spring jdbc更易用的第三个选择？</strong></p>
+<h3 id="第三种方案kotlin-spring-jdbc">第三种方案：kotlin + spring jdbc</h3>
+<p>先上代码：</p>
+<pre><code>@Repository
+abstract class BaseDAO {
+
+    @Resource
+    private lateinit var sequenceService: SequenceService
+
+    fun createEntity(tableName: String, entityDO: EntityDO, jdbcInsert: SimpleJdbcInsert): Long {
+        if (entityDO.id == null) {
+            entityDO.id = sequenceService.nextValue(tableName)
+        }
+        entityDO.gmtCreate = Date()
+        entityDO.gmtModified = Date()
+        val affectRow: Number = jdbcInsert.execute(BeanPropertySqlParameterSource(entityDO))
+        if (affectRow != 1) {
+            throw RuntimeException(&quot;create jdbcInsert.execute fail&quot;)
+        }
+
+        return entityDO.id
+    }
+}
+
+@Repository
+class TenantStaffDAO : BaseDAO() {
+
+    private val tableName: String = &quot;tenant_staff&quot;
+
+    @Resource
+    private lateinit var jdbcTemplate: JdbcTemplate
+
+    private lateinit var jdbcInsert: SimpleJdbcInsert
+
+    private lateinit var jdbcUpdate: SimpleJdbcUpdate
+
+    @PostConstruct
+    fun init() {
+        jdbcInsert = SimpleJdbcInsert(jdbcTemplate).withTableName(tableName)
+        jdbcUpdate = SimpleJdbcUpdate(jdbcTemplate).withTableName(tableName).ukColumns(&quot;tenant_id&quot;, &quot;id&quot;)
+    }
+
+    fun create(staffDO: TenantStaffDO): Long {
+        return super.createEntity(tableName, staffDO, jdbcInsert)
+    }
+
+    fun get(tenantId: Long, staffId: Long): TenantStaffDO? {
+        val results = jdbcTemplate.query(&quot;select * from tenant_staff where tenant_id = ? and id = ?&quot;,
+                arrayOf(tenantId, staffId), BeanPropertyRowMapper(TenantStaffDO::class.java))
+        return DataAccessUtils.singleResult(results)
+    }
+
+    fun getByUid(tenantId: Long, uid: Long): TenantStaffDO? {
+        val results = jdbcTemplate.query(&quot;select * from tenant_staff where tenant_id = ? and uid = ?&quot;,
+                arrayOf(tenantId, uid), BeanPropertyRowMapper(TenantStaffDO::class.java))
+        return DataAccessUtils.singleResult(results)
+    }
+
+    fun batchGet(tenantId: Long, staffIdList: List&lt;Long&gt;): List&lt;TenantStaffDO&gt;? {
+        val sql = &quot;&quot;&quot;
+             select * from tenant_staff 
+             where tenant_id = ? 
+             and id in ${staffIdList.joinToString(prefix = &quot;(&quot;, separator = &quot;, &quot;, postfix = &quot;)&quot;) { &quot;?&quot; }}
+            &quot;&quot;&quot;
+        val args = arrayListOf&lt;Any&gt;()
+        args.add(tenantId)
+        args.addAll(staffIdList)
+        return jdbcTemplate.query(sql, args.toArray(), BeanPropertyRowMapper(TenantStaffDO::class.java))
+    }
+
+    fun listStaffs(tenantId: Long, size: Int, offset: Long): List&lt;TenantStaffDO&gt;? {
+        val sql = &quot;select * from tenant_staff where tenant_id = ? order by id desc limit ? offset ?&quot;
+        return jdbcTemplate.query(sql, arrayOf(tenantId, size, offset), BeanPropertyRowMapper(TenantStaffDO::class.java))
+    }
+
+    fun listTenants(uid: Long): List&lt;TenantStaffDO&gt;? {
+        val sql = &quot;select * from tenant_staff where uid = ?&quot;
+        return jdbcTemplate.query(sql, arrayOf(uid), BeanPropertyRowMapper(TenantStaffDO::class.java))
+    }
+
+    fun singleUpdate(staffDO: TenantStaffDO): Boolean {
+        staffDO.gmtModified = Date()
+        return jdbcUpdate.singleUpdate(staffDO)
+    }
+
+    fun delete(tenantId: Long, id: Long): Int {
+        return jdbcTemplate.update(&quot;delete from tenant_staff where tenant_id = ? and id = ?&quot;, tenantId, id)
+    }
+
+    fun count(tenantId: Long): Int {
+        return jdbcTemplate.queryForObject(&quot;select count(*) from tenant_staff where tenant_id = ?&quot;,
+                arrayOf(tenantId), Int::class.java)
+    }
+
+}
+</code></pre>
+<h4 id="解决了dal层最基本需求">解决了dal层最基本需求</h4>
+<ul>
+<li>数据库结果到java对象映射</li>
+<li>支持动态sql能力，比如in查询的列表，动态拼接</li>
+<li>使用SimpleJdbcInsert进行DO对象的写入，可以做到不用关心表的字段</li>
+<li>另外，spring-jdbc没有提供<a href="http://gitlab.alibaba-inc.com/hanxuan.mh/simple-jdbc-update">SimpleJdbcUpdate</a>的实现，简单实现了一个，可以达到一样的效果：传入DO对象进行update</li>
+</ul>
+<h4 id="几个好处">几个好处</h4>
+<ul>
+<li>和java混合编程，基本可以无缝衔接</li>
+<li>直接编写程序员最熟悉的sql，而不是去理解一个xml或者lambda的转换层
+<ul>
+<li>不需要了解xml动态模板语法</li>
+<li>特殊字符无需转义</li>
+</ul>
+</li>
+<li>底层基于spring jdbc，简单纯粹</li>
+<li>借助kotlin的字符串模板功能，基本可以做到mybatis的xml模板同样的效果。支持if、for等</li>
+</ul>
+<h4 id="存在的问题">存在的问题</h4>
+<ul>
+<li>java编写的DO类，如果使用了lombok，kotlin dao层代码在引用DO对象的属性时，会报编译错误。目前lombok和kotlin还无法在一起完美使用。解决办法是，在DO类里将kotlin代码使用的对象，手动生成setter、getter</li>
+</ul>
+<hr>
+<p>另外，附上文中提到的几个框架的介绍链接</p>
+<ul>
+<li><a href="https://www.atatech.org/articles/176973?spm=ata.13269325.0.0.712d49faNqVZYN">Mybatis-plus学习与实践——从繁琐的CRUD中解放出来</a></li>
+<li><a href="https://www.atatech.org/articles/137371?spm=ata.13269325.0.0.712d49faNqVZYN">对mybatis和mybatis plus进行扩展，更好的支持dao编码和测试</a></li>
+<li><a href="https://github.com/VonChange/spring-data-mybatis-mini">spring-data-mybatis-mini：spring jdbc + mybatis 实现动态sql能力</a></li>
+<li><a href="https://www.atatech.org/articles/168216?spm=ata.13269325.0.0.690449faq0aiZg">你还在用 MyBatis 吗，Ktorm 了解一下？——专注于 Kotlin 的 ORM 框架</a></li>
+</ul>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://phantomma.top/post/springcloud-on-k8s-demo/" class="post-title gt-a-link">
+                    SpringCloud On K8s Demo
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/PhantomMaa" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <script async defer src="https://tianji.phantom-lab.top/tracker.js" data-website-id="cmbpyo8l2006qjtlrb00mtn00"></script>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://phantomma.top/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

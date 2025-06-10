@@ -1,0 +1,271 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>linux 命令 | 幻影笔记</title>
+
+<link rel="shortcut icon" href="https://phantomma.top/favicon.ico?v=1749526134625">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://phantomma.top/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            幻影笔记
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://phantomma.xyz/post/guan-yu" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1749526134625"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    linux 命令
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2012-01-06 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h3 id="查看系统版本">查看系统版本</h3>
+<ul>
+<li>lsb_release -a // 适用于RedHat、SUSE、Debian</li>
+<li>cat /etc/redhat-release // 适用于RedHat</li>
+<li>cat /etc/issue // 用于所有的Linux发行版</li>
+</ul>
+<h3 id="查看操作系统内核版本">查看操作系统内核版本</h3>
+<ul>
+<li>uname -a</li>
+</ul>
+<h3 id="计算tps">计算tps</h3>
+<p><code>tail -f lippi_card.log | grep 'cardManager.correctCardExtension' | awk -F ' ' '{print $1}' | awk -F '.' '{print $1}' | uniq -c</code><br>
+<img src="https://phantomma.top/post-images/1701394609376.png" alt="" loading="lazy"></p>
+<h3 id="汇总多台机器的count">汇总多台机器的count</h3>
+<p><code>$pgm -Ab -f login &quot;cat /home/admin/logs/lippi-login/lippi_login.log.2019-04-29 | grep 'checkPassword mobile:' | awk -F'mobile:' '{print $2}' | awk -F' ' '{print $1}' | sort | uniq -c | wc -l&quot; | grep -v 'SUCCESS' | grep -v ^$ | awk '{sum += $1};END {print sum}'</code></p>
+<h3 id="grep-多行">grep 多行</h3>
+<p>grep -C 5 foo file 显示file文件里匹配foo字串那行以及上下5行</p>
+<h3 id="grep多个关键字">grep多个关键字</h3>
+<pre><code>grep -E '123|abc' filename  // 找出文件（filename）中包含123或者包含abc的行
+egrep '123|abc' filename    // 用egrep同样可以实现
+</code></pre>
+<h3 id="格式化时间戳">格式化时间戳</h3>
+<pre><code>$ date &quot;+%Y-%m-%d %H:%M:%S&quot; -d @1489739011
+2017-03-17 01:23:31
+</code></pre>
+<h3 id="安装arthas">安装Arthas</h3>
+<pre><code>curl -L http://start.alibaba-inc.com/install.sh | sh
+</code></pre>
+<h3 id="tail-f-多次grep过滤输出">tail -f 多次grep过滤输出</h3>
+<p><code>tail -f log | grep --line-buffer xxx | grep yyy</code></p>
+<h3 id="用catsortuniq命令实现文件行的交集-并集-补集">用cat，sort，uniq命令实现文件行的交集 、并集、补集</h3>
+<ul>
+<li>交集 F1 ∩ F2<br>
+<code>cat f1 f2 | sort | uniq -d</code></li>
+<li>并集 F1 ∪ F2<br>
+<code>cat f1 f2 | sort | uniq</code></li>
+<li>并集 - 交集 F1∪F2−F1∩F2<br>
+<code>cat f1 f2 | sort | uniq -u</code></li>
+<li>补集 F1−F2=(F1∪F2)∪F2 − (F1∪F2)∩F2<br>
+<code>cat f1 f2 | sort | uniq | cat f2 - | sort | uniq -u</code></li>
+</ul>
+<h3 id="json内容去掉换行并格式化">json内容去掉换行，并格式化</h3>
+<p><code>$echo -e &quot;$( curl -s -XGET http://11.27.132.160:7001/r/WorkspaceSceneI/getValuePageList -H 'uid:158250@dingding' --data-binary '[&quot;68003&quot;]' )&quot; | tr -d '\n' | ./jq</code></p>
+<h3 id="用户相关">用户相关</h3>
+<ul>
+<li><code>useradd –d /home/admin -m admin</code> // 此命令创建admin用户和文件夹</li>
+<li><code>useradd admin -m</code> // centOS 7以上，用此命令</li>
+<li><code>passwd admin</code>	// 设置用户密码</li>
+<li>添加用户到sudoers列表中
+<ul>
+<li><code>chmod +w /etc/sudoers</code>	// 添加admin用户到sudoer list</li>
+<li>在root ALL=(ALL:ALL) ALL 下面添加一行：admin ALL=(ALL) ALL</li>
+</ul>
+</li>
+</ul>
+<h3 id="压缩-解压缩">压缩、解压缩</h3>
+<ul>
+<li><code>zip -e -r jingwei3-all.zip jingwei3-all</code></li>
+<li><code>unzip jingwei3-all.zip -d jingwei3-all</code></li>
+<li><code>tar -zcvf jingwei3-all.tar.gz ./jingwei3-all</code> // 压缩</li>
+<li><code>tar -xvf jingwei3-all.tar.gz</code> // 解压缩</li>
+</ul>
+<h3 id="解密加密的邮件">解密加密的邮件</h3>
+<p><code>echo Y2FpcnVucWlhbmdAYnl0ZWRhbmNlLmNvbQ== | base64 --decode</code></p>
+<h3 id="vim-技巧">vim 技巧</h3>
+<ul>
+<li><code>:se so=999</code>	// 光标总在屏幕中间</li>
+<li><code>:noh</code>	// 取消搜索高亮</li>
+<li>解决vim乱码，编辑~/.vimrc</li>
+</ul>
+<p>方法一：</p>
+<pre><code>set fileencodings=utf-8,ucs-bom,gb18030,gbk,gb2312,cp936
+set termencoding=utf-8
+set encoding=utf-8
+</code></pre>
+<p>方法二：<br>
+<code>:set enc=utf8</code></p>
+<ul>
+<li>vim粘贴乱码</li>
+</ul>
+<pre><code>进入 paste 模式：
+:set paste
+进入 paste 模式后，按 i 键进入插入模式，然后再粘帖，文本格式不会错乱了
+结束 paste 模式：
+:set nopaste
+</code></pre>
+<h3 id="终端快捷键">终端快捷键</h3>
+<ul>
+<li>移动到所在行首：ctrl + a</li>
+<li>移动到所在行尾：ctrl + e</li>
+<li>清除光标到行首的内容：ctrl + u</li>
+<li>清除光标到行尾的内容：ctrl + k</li>
+<li>移动到所在单词的词首：esc + b</li>
+<li>移动到所在单词的词尾：esc + f</li>
+<li>删除前一个单词：crtl + w</li>
+<li>清除屏幕内容：ctrl + l</li>
+<li>内容提示或补全：tab</li>
+</ul>
+<h4 id="其他">其他</h4>
+<ul>
+<li><code>jmap -dump:format=b,file=T_FD_62.bin 62414</code> // dump内存</li>
+<li><code>dstat -nt</code> // 查看网络流量</li>
+<li><code>curl icanhazip.com</code>	// 查看外网ip</li>
+</ul>
+
+                </div>
+            </article>
+        </div>
+
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/PhantomMaa" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <script async defer src="https://tianji.phantom-lab.top/tracker.js" data-website-id="cmbpyo8l2006qjtlrb00mtn00"></script>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://phantomma.top/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

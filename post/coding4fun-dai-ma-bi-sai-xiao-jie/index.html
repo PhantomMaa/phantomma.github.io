@@ -1,0 +1,222 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>中间件性能挑战赛 比赛小结 | 幻影笔记</title>
+
+<link rel="shortcut icon" href="https://phantomma.top/favicon.ico?v=1749526134625">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://phantomma.top/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            幻影笔记
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://phantomma.xyz/post/guan-yu" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1749526134625"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    中间件性能挑战赛 比赛小结
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2013-08-27 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p>上周参加中间件性能挑战赛，赛题的大致意思就是充分利用多核CPU，看谁开发的程序最快。对于这类题目，语言的选择上就显得很重要，因为对于同样的算法，在都做了充分的优化的情况下，就剩下纯粹的比拼语言的执行效率了。</p>
+<p>所以我选择了用go，可能有些同学还不太了解，首先看一下go语言的显著的几个特点：</p>
+<ol>
+<li>和c\c++一样都是编译型语言，直接编译成本地机器码执行，官方所说执行效率逼近c</li>
+<li>语言自带垃圾回收，编译时编译进运行时</li>
+<li>语言内建协程，以非常廉价的方式实现并行</li>
+<li>编程多范式支持，可以既面向过程又面向对象，还可以函数式编程</li>
+</ol>
+<p>下面简单说一下我的思路:</p>
+<ol>
+<li>我使用的字典树的数据结构，这种数据结构对于小文本的来说是比较有利的，后面换成大文本，字典树就有些力不从心了。基本结构就是一个节点代表一个字符，里面包含从这个节点向上遍历形成的单词的count。</li>
+</ol>
+<pre><code>type CharTreeNode struct {
+    Count    int
+    Children [26]*CharTreeNode
+}
+</code></pre>
+<ol start="2">
+<li>
+<p>总体的流程图是：<br>
+<img src="https://phantomma.top/post-images/1701397115282.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>申请一个很大的byte数组，一次性把文本读入内存。这个时间没什么好优化的了，因为即使是1.1G的文件，这个时间大约是600多ms。</p>
+</li>
+<li>
+<p>多协程构建字典树。引入生产者消费者模型，有生产线程不断从byte数组中拆分byte片段，这里的拆分需要注意的是不能把一个单词拆分成两半。</p>
+</li>
+</ol>
+<p>然后把拆分出来的byte片段的指针不断放到缓冲通道里去，同时会启动和cpu核数相当的消费者协程不断从缓冲通道里消费byte片段。</p>
+<p>消费者协程共享同一棵字典树，一旦拿到byte片段，就调用构建字典树的方法。这里为什么采用这样的方案是因为，最初可以分为cpu核数 大的byte片段，然后每个线程分别去构建这几个大的片段，这时会发现，分割的粒度太粗，每个协程构建字典树的时间差异很大，有的很快完成，有的会慢一些。那么最终的总耗时时间会由最慢的协程决定。所以引入生产者消费者来达到使分割的粒度足够小，每个协程的构建时间能比较平均，最后总的耗时会整体变小。这里也是利用了go语言的高效并发通信的优势，go内建了协程间的通信通道，不同执行体之间的通信不像java一样采用共享内存的方式，而是采用erlang的方案，通过语言提供的高效通信通道来通信，换用go的话说就是Do not communicate by sharing memory; instead, share memory by communicating。通过这样的优化确实能达到各个执行体的耗时比较平均，总体的提升有1秒多的样子，但是依然是主要耗时任务，这个过程差不多就要3s了。</p>
+<ol start="5">
+<li>
+<p>等待所有协程构建字典树完成，然后遍历字典树，count的值大于1的节点向上遍历就可以形成一个单词，然后把单词和他的count插入到一个长度固定的排序的链表，就可以拿到最后的结果。这个遍历字典树和排序的过程会总共耗时30~40ms。</p>
+</li>
+<li>
+<p>所有消费者线程共享构建同一棵字典树，其中CharTreeNode中的count会更新非常频繁，为保证线程安全使用了和java中的AtomInteger同样的方式：atomic.AddInt32(&amp;current.Count, 1)。CharTreeNode另外的成员变量Children，在对某一个child赋值的时候同样存在线程安全问题，不过在所有的构建字典树协程同时对同一个节点的同一个child赋值的情况并不多，这里采用了加锁的方式保证线程安全：</p>
+</li>
+</ol>
+<pre><code>lock := &amp;sync.Mutex{}
+lock.Lock()
+current.Children[offset] = new(CharTreeNode)
+lock.Unlock()
+</code></pre>
+<p>因为执行到这里代码块的概率非常小，我做过实验，去掉加锁，对结果的准确性和耗时的影响都微乎其微。</p>
+<h1 id="比赛总结">比赛总结</h1>
+<p>所以上面的主要四个过程，可以说构建字典树占用了绝大多数的时间。这也就是文本开始是20m大小时，比较快的几个中有好多字典树的方案，到后面使用1G的文本时，他们多消失不见了。字典树这种结构个人感觉比较适合于小文本的情况，文本越大，它的劣势也就越明显。粗略估计，问题在于，字典树以字符为维度统计，而map以单词为维度统计。例如，一个小文本，可以共有100w个字符、2w种单词，比例为50；一个大文本，字符共有10000w个，单词可能是4w种，比例为2500。所以文本越大map就会相对越节省时间。</p>
+<p>语言的选择固然重要，所以看到前五名都是c++。但是现代语言都已经很成熟，运行效率相差不大的情况下，采用的数据结构和算法才是决定因素。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://phantomma.top/post/go-di-gui-han-shu-ru-he-chuan-di-shu-zu-qie-pian-slice/" class="post-title gt-a-link">
+                    go 递归函数如何传递数组切片 slice
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/PhantomMaa" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <script async defer src="https://tianji.phantom-lab.top/tracker.js" data-website-id="cmbpyo8l2006qjtlrb00mtn00"></script>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://phantomma.top/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

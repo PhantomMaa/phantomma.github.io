@@ -1,0 +1,333 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>mysql的一致性视图（MVCC） | 幻影笔记</title>
+
+<link rel="shortcut icon" href="https://phantomma.top/favicon.ico?v=1749526134625">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://phantomma.top/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            幻影笔记
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://phantomma.xyz/post/guan-yu" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1749526134625"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    mysql的一致性视图（MVCC）
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2013-12-19 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p>提到事务，你肯定会想到ACID（Atomicity、Consistency、Isolation、Durability，即原子性、一致性、隔离性、持久性），我们就来说说其中I，也就是“隔离性”。</p>
+<p>当数据库上有多个事务同时执行的时候，就可能出现脏读（dirty read）、不可重复读（non-repeatable read）、幻读（phantom read）的问题，所以下面我们来说说隔离级别。</p>
+<p>SQL标准的事务隔离级别包括：读未提交（read uncommitted）、读提交（read committed）、可重复读（repeatable read）、串行化（serializable）。</p>
+<ul>
+<li>读未提交是指，一个事务还没提交时，它做的变更就能被别的事务看到。</li>
+<li>读提交指，一个事务提交之后，它做的变更才会被其他事务看到。</li>
+<li>可重复读指，一个事务执行过程中看到的数据，总是跟这个事务在启动时看到的数据时一致的。当然可重复读隔离级别下，未提交变更对其他事务也是不可见的。</li>
+<li>串行化，顾名思义是对于同一行记录，“写”会加“写锁”，“读”会加“读锁”。当出现读写锁冲突的时候，后访问的事务必须等前一个事务执行完成，才能继续执行。</li>
+</ul>
+<h1 id="mysql中支持的四种隔离级别">MySQL中支持的四种隔离级别</h1>
+<p>MySQL虽然支持4种隔离级别，但与SQL标准中所规定的各级隔离级别允许发生的问题却有些出入，MySQL在REPEATABLE READ隔离级别下，是可以禁止幻读问题的发生的。</p>
+<p>我们可以通过：<br>
+<code>SET [GLOBAL|SESSION] TRANSACTION ISOLATION LEVEL level;</code><br>
+来设置隔离级别。</p>
+<p>其中的level可选值有4个：</p>
+<ul>
+<li>REPEATABLE READ</li>
+<li>READ COMMITTED</li>
+<li>READ UNCOMMITTED</li>
+<li>SERIALIZABLE</li>
+</ul>
+<h1 id="mvcc原理">MVCC原理</h1>
+<p>对于使用InnoDB存储引擎的表来说，它的聚簇索引记录中都包含必要的隐藏列：</p>
+<ul>
+<li>trx_id：每次一个事务对某条聚簇索引记录进行改动时，都会把该事务的事务id赋值给trx_id隐藏列。</li>
+</ul>
+<h2 id="readview">ReadView</h2>
+<p>ReadView所解决的问题是使用READ COMMITTED和REPEATABLE READ隔离级别的事务中，不能读到未提交的记录，这需要判断一下版本链中的哪个版本是当前事务可见的。</p>
+<p>ReadView中主要包含4个比较重要的内容：</p>
+<ul>
+<li>m_ids：表示在生成ReadView时当前系统中活跃的读写事务的事务id列表。</li>
+<li>min_trx_id：表示在生成ReadView时当前系统中活跃的读写事务中最小的事务id，也就是m_ids中的最小值。</li>
+<li>max_trx_id：表示生成ReadView时系统中应该分配给下一个事务的id值。</li>
+<li>creator_trx_id：表示生成该ReadView的事务的事务id。</li>
+</ul>
+<h2 id="readview是如何工作的">ReadView是如何工作的？</h2>
+<p>有了这些信息，这样在访问某条记录时，只需要按照下边的步骤判断记录的某个版本是否可见：</p>
+<ul>
+<li>如果被访问版本的trx_id属性值与ReadView中的creator_trx_id值相同，意味着当前事务在访问它自己修改过的记录，所以该版本可以被当前事务访问。</li>
+<li>如果被访问版本的trx_id属性值小于ReadView中的min_trx_id值，表明生成该版本的事务在当前事务生成ReadView前已经提交，所以该版本可以被当前事务访问。</li>
+<li>如果被访问版本的trx_id属性值大于ReadView中的max_trx_id值，表明生成该版本的事务在当前事务生成ReadView后才开启，所以该版本不可以被当前事务访问。</li>
+<li>如果被访问版本的trx_id属性值在ReadView的min_trx_id和max_trx_id之间，那就需要判断一下trx_id属性值是不是在m_ids列表中，如果在，说明创建ReadView时生成该版本的事务还是活跃的，该版本不可以被访问；如果不在，说明创建ReadView时生成该版本的事务已经被提交，该版本可以被访问。</li>
+<li>如果某个版本的数据对当前事务不可见的话，那就顺着版本链找到下一个版本的数据，继续按照上边的步骤判断可见性，依此类推，直到版本链中的最后一个版本。如果最后一个版本也不可见的话，那么就意味着该条记录对该事务完全不可见，查询结果就不包含该记录。</li>
+</ul>
+<p>在MySQL中，READ COMMITTED和REPEATABLE READ隔离级别的的一个非常大的区别就是它们生成ReadView的时机不同。</p>
+<p>我们这里使用一个示例来解释：</p>
+<pre><code>mysql&gt; CREATE TABLE `t` (
+  `id` int(11) NOT NULL,
+  `k` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+insert into t(id, k) values(1,1) ;
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>事务A</th>
+<th>事务B</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>begin</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>begin</td>
+</tr>
+<tr>
+<td></td>
+<td>update t set k= k+1 where id=1;</td>
+</tr>
+<tr>
+<td></td>
+<td>commit；</td>
+</tr>
+<tr>
+<td>update t set k = k+1 where id=1;</td>
+<td></td>
+</tr>
+<tr>
+<td>select k from t where id =1;</td>
+<td></td>
+</tr>
+<tr>
+<td>commit;</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>在这个例子中，我们做如下假设:</p>
+<ul>
+<li>事务A、B的版本号分别是100、200，且当前系统里只有这3个事务；</li>
+<li>三个事务开始前，(1,1）这一行数据的row trx_id是90。</li>
+</ul>
+<h2 id="read-committed-每次读取数据前都生成一个readview">READ COMMITTED —— 每次读取数据前都生成一个ReadView</h2>
+<p>继续上面的例子，假设现在有一个使用READ COMMITTED隔离级别的事务开始执行：</p>
+<pre><code># 使用READ COMMITTED隔离级别的事务
+BEGIN;
+
+# SELECT1：Transaction 100、200未提交
+select k from t where id=1 ; # 得到值为1
+</code></pre>
+<p>这个SELECT1的执行过程如下：</p>
+<ul>
+<li>在执行SELECT语句时会先生成一个ReadView，ReadView的m_ids列表的内容就是[100, 200]，min_trx_id为100，max_trx_id为201，creator_trx_id为0。</li>
+<li>然后从版本链中挑选可见的记录，最新的版本trx_id值为200，在m_ids列表内，所以不符合可见性要求</li>
+<li>下一个版本的trx_id值也为100，也在m_ids列表内，所以也不符合要求，继续跳到下一个版本。</li>
+<li>下一个版本的trx_id值为90，小于ReadView中的min_trx_id值100，所以这个版本是符合要求的。</li>
+</ul>
+<p>之后，我们把事务B的事务提交一下，然后再到刚才使用READ COMMITTED隔离级别的事务中继续查找，如下：</p>
+<pre><code># 使用READ COMMITTED隔离级别的事务
+BEGIN;
+
+# SELECT1：Transaction 100、200均未提交
+SELECT * FROM hero WHERE number = 1; # 得到值为1
+
+# SELECT2：Transaction 200提交，Transaction 100未提交
+SELECT * FROM hero WHERE number = 1; # 得到值为2
+</code></pre>
+<p>这个SELECT2的执行过程如下：</p>
+<ul>
+<li>在执行SELECT语句时会又会单独生成一个ReadView，该ReadView的m_ids列表的内容就是[100]（事务id为200的那个事务已经提交了，所以再次生成快照时就没有它了），min_trx_id为100，max_trx_id为201，creator_trx_id为0。</li>
+<li>然后从版本链中挑选可见的记录，从图中可以看出，最新版本trx_id值为100，在m_ids列表内，所以不符合可见性要求</li>
+<li>下一个版本的trx_id值为200,小于max_trx_id，并且不在m_ids列表中，所以可见，返回的值为2</li>
+</ul>
+<h2 id="repeatable-read-在第一次读取数据时生成一个readview">REPEATABLE READ —— 在第一次读取数据时生成一个ReadView</h2>
+<p>假设现在有一个使用REPEATABLE READ隔离级别的事务开始执行：</p>
+<pre><code># 使用REPEATABLE READ隔离级别的事务
+BEGIN;
+
+# SELECT1：Transaction 100、200未提交
+SELECT * FROM hero WHERE number = 1; # 得到值为1
+</code></pre>
+<p>这个SELECT1的执行过程如下：</p>
+<ul>
+<li>在执行SELECT语句时会先生成一个ReadView，ReadView的m_ids列表的内容就是[100, 200]，min_trx_id为100，max_trx_id为201，creator_trx_id为0。</li>
+<li>然后从版本链中挑选可见的记录，该版本的trx_id值为100，在m_ids列表内，所以不符合可见性要求</li>
+<li>下一个版本该版本的trx_id值为200，也在m_ids列表内，所以也不符合要求，继续跳到下一个版本。</li>
+<li>下一个版本的trx_id值为90，小于ReadView中的min_trx_id值100，所以这个版本是符合要求的。</li>
+</ul>
+<p>之后，我们把事务B的事务提交一下。然后再到刚才使用REPEATABLE READ隔离级别的事务中继续查找:</p>
+<pre><code># 使用REPEATABLE READ隔离级别的事务
+BEGIN;
+
+# SELECT1：Transaction 100、200均未提交
+SELECT * FROM hero WHERE number = 1; # 得到值为1
+
+# SELECT2：Transaction 200提交，Transaction 100未提交
+SELECT * FROM hero WHERE number = 1; # 得到值为1
+</code></pre>
+<p>这个SELECT2的执行过程如下：</p>
+<ul>
+<li>因为当前事务的隔离级别为REPEATABLE READ，而之前在执行SELECT1时已经生成过ReadView了，所以此时直接复用之前的ReadView，之前的ReadView的m_ids列表的内容就是[100, 200]，min_trx_id为100，max_trx_id为201，creator_trx_id为0。</li>
+<li>然后从版本链中挑选可见的记录，该版本的trx_id值为100，在m_ids列表内，所以不符合可见性要求</li>
+<li>下一个版本该版本的trx_id值为200，也在m_ids列表内，所以也不符合要求，继续跳到下一个版本。</li>
+<li>下一个版本的trx_id值为90，小于ReadView中的min_trx_id值100，所以这个版本是符合要求的。</li>
+</ul>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://phantomma.top/post/coding4fun-dai-ma-bi-sai-xiao-jie/" class="post-title gt-a-link">
+                    中间件性能挑战赛 比赛小结
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/PhantomMaa" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <script async defer src="https://tianji.phantom-lab.top/tracker.js" data-website-id="cmbpyo8l2006qjtlrb00mtn00"></script>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://phantomma.top/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

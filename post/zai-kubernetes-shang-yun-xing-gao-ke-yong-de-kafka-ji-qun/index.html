@@ -1,0 +1,314 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>在 Kubernetes 上运行高可用的 Kafka 集群 | 幻影笔记</title>
+
+<link rel="shortcut icon" href="https://phantomma.top/favicon.ico?v=1749526134625">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://phantomma.top/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            幻影笔记
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://phantomma.xyz/post/guan-yu" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1749526134625"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    在 Kubernetes 上运行高可用的 Kafka 集群
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2020-12-21 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p>Apache Kafka 是目前最流行的分布式消息发布订阅系统，虽然 Kafka 非常强大，但它同样复杂，需要一个高可用的强大平台来运行。在微服务盛行，大多数公司都采用分布式计算的今天，将 Kafka 作为核心的消息系统使用还是非常有优势的。</p>
+<p>如果你在 Kubernetes 集群中运行你的微服务，那么在 Kubernetes 中运行 Kafka 集群也是很有意义的，这样可以利用其内置的弹性和高可用，我们可以使用内置的 Kubernetes 服务发现轻松地与集群内的 Kafka Pods 进行交互。</p>
+<p>下面我们将来介绍下如何在 Kubernetes 上构建分布式的 Kafka 集群，这里我们将使用 Helm Chart 和 StatefulSet 来进行部署，当然如果想要动态生成持久化数据卷，还需要提前配置一个 StorageClass 资源，比如基于 Ceph RBD 的，如果你集群中没有配置动态卷，则需要提前创建 3 个未绑定的 PV 用于数据持久化。</p>
+<p>当前基于 Helm 官方仓库的 chartincubator/kafka 在 Kubernetes 上部署的 Kafka，使用的镜像是 confluentinc/cp-kafka:5.0.1，即部署的是 Confluent 公司提供的 Kafka 版本，Confluent Platform Kafka(简称 CP Kafka)提供了一些 Apache Kafka 没有的高级特性，例如跨数据中心备份、Schema 注册中心以及集群监控工具等。</p>
+<h1 id="安装">安装</h1>
+<p>使用 Helm Chart 安装当然前提要安装 Helm，直接使用最新版本的 Helm v3 版本即可：</p>
+<pre><code>&gt; wget https://get.helm.sh/helm-v3.4.0-linux-amd64.tar.gz
+&gt; tar -zxvf helm-v3.4.0-linux-amd64.tar.gz
+&gt; sudo cp -a linux-amd64/helm /usr/local/bin/helm
+&gt; chmod +x /usr/local/bin/helm
+</code></pre>
+<p>然后添加 Kafka 的 Chart 仓库：</p>
+<pre><code>&gt; helm repo add incubator http://mirror.azure.cn/kubernetes/charts-incubator/
+&gt; helm repo update
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the &quot;incubator&quot; chart repository
+...Successfully got an update from the &quot;stable&quot; chart repository
+Update Complete. ⎈Happy Helming!⎈
+</code></pre>
+<p>接着我们就可以配置需要安装的 Values 文件了，可以直接使用默认的 values.yaml 文件，然后可以用它来进行定制，比如指定我们自己的 StorageClass：</p>
+<pre><code>&gt; curl https://raw.githubusercontent.com/helm/charts/master/incubator/kafka/values.yaml &gt; kfk-values.yaml
+</code></pre>
+<p>这里我直接使用默认的进行安装：</p>
+<pre><code>&gt; helm install kafka incubator/kafka -f kfk-values.yaml
+NAME: kafka
+LAST DEPLOYED: Sun Nov  1 09:36:44 2020
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+NOTES:
+### Connecting to Kafka from inside Kubernetes
+
+You can connect to Kafka by running a simple pod in the K8s cluster like this with a configuration like this:
+
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    name: testclient
+    namespace: default
+  spec:
+    containers:
+    - name: kafka
+      image: confluentinc/cp-kafka:5.0.1
+      command:
+        - sh
+        - -c
+        - &quot;exec tail -f /dev/null&quot;
+
+Once you have the testclient pod above running, you can list all kafka
+topics with:
+
+  kubectl -n default exec testclient -- ./bin/kafka-topics.sh --zookeeper kafka-zookeeper:2181 --list
+
+To create a new topic:
+
+  kubectl -n default exec testclient -- ./bin/kafka-topics.sh --zookeeper kafka-zookeeper:2181 --topic test1 --create --partitions 1 --replication-factor 1
+
+To listen for messages on a topic:
+
+  kubectl -n default exec -ti testclient -- ./bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --topic test1 --from-beginning
+
+To stop the listener session above press: Ctrl+C
+
+To start an interactive message producer session:
+  kubectl -n default exec -ti testclient -- ./bin/kafka-console-producer.sh --broker-list kafka-headless:9092 --topic test1
+
+To create a message in the above session, simply type the message and press &quot;enter&quot;
+To end the producer session try: Ctrl+C
+
+If you specify &quot;zookeeper.connect&quot; in configurationOverrides, please replace &quot;kafka-zookeeper:2181&quot; with the value of &quot;zookeeper.connect&quot;, or you will get error.
+</code></pre>
+<p>如果你没配置 StorageClass 或者可用的 PV，安装的时候 kafka 的 Pod 会处于 Pending 状态，所以一定要提前配置好数据卷。</p>
+<p>正常情况隔一会儿 Kafka 就可以安装成功了：</p>
+<pre><code>&gt; kubectl get pods
+NAME                READY   STATUS    RESTARTS   AGE
+kafka-0             1/1     Running   0          25m
+kafka-1             1/1     Running   0          11m
+kafka-2             1/1     Running   0          2m
+kafka-zookeeper-0   1/1     Running   0          25m
+kafka-zookeeper-1   1/1     Running   0          22m
+kafka-zookeeper-2   1/1     Running   0          18m
+</code></pre>
+<p>默认会安装 3 个 ZK Pods 和 3 个 Kafka Pods，这样可以保证应用的高可用，也可以看下我配置的持久卷信息：</p>
+<pre><code>&gt; kubectl get pvc
+NAME              STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+datadir-kafka-0   Bound    kfk0     1Gi        RWO                           28m
+datadir-kafka-1   Bound    kfk1     1Gi        RWO                           13m
+datadir-kafka-2   Bound    kfk2     1Gi        RWO                           4m9s
+&gt; kubectl get pv
+NAME   CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                     STORAGECLASS   REASON   AGE
+kfk0   1Gi        RWO            Retain           Bound    default/datadir-kafka-0                           23m
+kfk1   1Gi        RWO            Retain           Bound    default/datadir-kafka-1                           22m
+kfk2   1Gi        RWO            Retain           Bound    default/datadir-kafka-2                           10m
+</code></pre>
+<p>如果我们配置一个 default 的 StorageClass，则会动态去申请持久化卷，如果你的集群没有启用动态卷，可以修改 values.yaml 来使用静态卷。</p>
+<p>然后查看下对应的 Service 对象：</p>
+<pre><code>&gt; kubectl get svc
+NAME                       TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
+kafka                      ClusterIP   10.100.205.187   &lt;none&gt;        9092/TCP                     31m
+kafka-headless             ClusterIP   None             &lt;none&gt;        9092/TCP                     31m
+kafka-zookeeper            ClusterIP   10.100.230.255   &lt;none&gt;        2181/TCP                     31m
+kafka-zookeeper-headless   ClusterIP   None             &lt;none&gt;        2181/TCP,3888/TCP,2888/TCP   31m
+kubernetes                 ClusterIP   10.96.0.1        &lt;none&gt;        443/TCP                      14d
+</code></pre>
+<p>可以看到又一个叫 kafka-zookeeper 的 zookeeper 服务和一个叫 kafka 的 Kafka 服务，对于 Kafka 集群的管理，我们将与 kafka-zookeeper 服务进行交互，对于集群消息的收发，我们将使用 kafka 服务。</p>
+<h1 id="客户端测试">客户端测试</h1>
+<p>现在 Kafka 集群已经搭建好了，接下来我们来安装一个 Kafka 客户端，用它来帮助我们产生和获取 topics 消息。</p>
+<p>直接使用下面的命令创建客户端：</p>
+<pre><code>&gt; cat &lt;&lt;EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: testclient
+  namespace: default
+spec:
+  containers:
+  - name: kafka
+    image: confluentinc/cp-kafka:5.0.1
+    command:
+      - sh
+      - -c
+      - &quot;exec tail -f /dev/null&quot;
+EOF
+&gt; kubectl get pod testclient
+NAME         READY   STATUS    RESTARTS   AGE
+testclient   1/1     Running   0          23s
+</code></pre>
+<p>客户端 Pod 创建成功后我们就可以开始进行一些简单的测试了。首先让我们创建一个名为 test1 的有一个分区和复制因子'1'的 topic：</p>
+<pre><code>&gt; kubectl exec -it testclient -- /usr/bin/kafka-topics --zookeeper kafka-zookeeper:2181 --topic test1 --create --partitions 1 --replication-factor 1
+Created topic &quot;test1&quot;.
+</code></pre>
+<p>然后创建一个生产者，将消息发布到这个 topic 主题上：</p>
+<pre><code>&gt; kubectl  exec -ti testclient -- /usr/bin/kafka-console-producer --broker-list kafka:9092 --topic test1
+</code></pre>
+<p>然后重新打一个终端页面，让我们打开一个消费者会话，这样我们就可以看到我们发送的消息了。</p>
+<pre><code>&gt; kubectl exec -ti testclient -- /usr/bin/kafka-console-consumer --bootstrap-server kafka:9092 --topic test1
+</code></pre>
+<p>现在我们在生产者的窗口发送消息，在上面的消费者会话窗口中就可以看到对应的消息了：<br>
+<img src="https://phantomma.top/post-images/1701437469791.webp" alt="" loading="lazy"></p>
+<p>到这里证明 Kafka 集群就正常工作了。比如需要注意 zk 集群我们并没有做持久化，如果是生产环境一定记得做下数据持久化，在 values.yaml 文件中根据需求进行定制即可，当然对于生产环境还是推荐使用 Operator 来搭建 Kafka 集群，比如 <code>strimzi-kafka-operator</code>。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://phantomma.top/post/helm-chart-mo-ban-kai-fa-ji-qiao/" class="post-title gt-a-link">
+                    Helm Chart 模板技巧
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/PhantomMaa" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <script async defer src="https://tianji.phantom-lab.top/tracker.js" data-website-id="cmbpyo8l2006qjtlrb00mtn00"></script>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://phantomma.top/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

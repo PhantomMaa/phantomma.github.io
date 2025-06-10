@@ -1,0 +1,257 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>vagrant 一键拉起 github action runner | 幻影笔记</title>
+
+<link rel="shortcut icon" href="https://phantomma.top/favicon.ico?v=1749526134625">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://phantomma.top/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            幻影笔记
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://phantomma.xyz/post/guan-yu" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1749526134625"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    vagrant 一键拉起 github action runner
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2023-03-06 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <p>一个通用的 github runner 定义。可按需定制为自己想要的</p>
+<pre><code># hostname
+$host_name = &quot;XXX&quot;
+$host_ip = &quot;XXX&quot;
+$runner_token = &quot;XXX&quot;
+
+Vagrant.configure(&quot;2&quot;) do |config|
+  
+  config.vm.box = &quot;ubuntu/jammy64&quot;
+  config.vm.box_url = &quot;https://mirrors.tuna.tsinghua.edu.cn/ubuntu-cloud-images/jammy/current/jammy-server-cloudimg-amd64-vagrant.box&quot;
+
+  config.vm.hostname = $host_name
+  config.vm.network &quot;private_network&quot;, ip: $host_ip
+
+  # spec config
+  config.vm.provider :virtualbox do |vbox|
+    vbox.name    = $host_name
+    vbox.cpus    = 4
+    vbox.memory  = 8000
+  end
+
+  # init shell, run as root
+  config.vm.provision &quot;shell&quot;, path: &quot;run_as_root.sh&quot;
+  # init shell, run as user
+  config.vm.provision &quot;shell&quot;, privileged: false, path: &quot;run_as_user.sh&quot;, args: [$runner_token]
+end
+</code></pre>
+<p>以root身份执行的动作：</p>
+<pre><code># 启用ssh密码认证
+echo &quot;[Step 1] Enable ssh password authentication&quot;
+sed -i 's/^PasswordAuthentication .*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+echo 'PermitRootLogin yes' &gt;&gt; /etc/ssh/sshd_config
+systemctl reload sshd
+
+# ssh以root用户登陆，需要重置root密码
+echo &quot;[Step 2] change root password&quot;
+echo &quot;root:123456&quot; | sudo chpasswd
+
+# apt install apps
+echo &quot;[Step 3] apt install apps&quot;
+sed -i '1i deb http://cn.archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse' /etc/apt/sources.list
+sed -i '1i deb http://cn.archive.ubuntu.com/ubuntu/ jammy-updates multiverse' /etc/apt/sources.list
+sed -i '1i deb http://cn.archive.ubuntu.com/ubuntu/ jammy multiverse' /etc/apt/sources.list
+sed -i '1i deb http://cn.archive.ubuntu.com/ubuntu/ jammy-updates universe' /etc/apt/sources.list
+sed -i '1i deb http://cn.archive.ubuntu.com/ubuntu/ jammy universe' /etc/apt/sources.list
+sed -i '1i deb http://cn.archive.ubuntu.com/ubuntu/ jammy-updates main restricted' /etc/apt/sources.list
+sed -i '1i deb http://cn.archive.ubuntu.com/ubuntu/ jammy main restricted' /etc/apt/sources.list
+apt-get update
+apt-get install -y \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release \
+    mysql-client
+mkdir -m 0755 -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo \
+  &quot;deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable&quot; | tee /etc/apt/sources.list.d/docker.list &gt; /dev/null
+apt-get update
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# add docker registry mirror
+# echo &quot;[Step 4] add docker registry mirror&quot;
+tee /etc/docker/daemon.json &lt;&lt;-EOF
+{
+    &quot;registry-mirrors&quot;: [&quot;https://registry.docker-cn.com&quot;,&quot;http://hub-mirror.c.163.com&quot;]
+}
+EOF
+
+# docker cmd need no root
+echo &quot;[Step 5] docker cmd need no root&quot;
+usermod -aG docker vagrant
+</code></pre>
+<p>以普通用户身份执行的动作：</p>
+<pre><code># install and config github action runner
+echo &quot;[Step 6] install and config github action runner&quot;
+mkdir actions-runner &amp;&amp; cd actions-runner
+curl -o ./actions-runner-linux-x64-2.302.1.tar.gz -L https://github.com/actions/runner/releases/download/v2.302.1/actions-runner-linux-x64-2.302.1.tar.gz
+tar xzf ./actions-runner-linux-x64-2.302.1.tar.gz
+./config.sh --url https://github.com/AutoMQ --token $1 --unattended
+nohup ./run.sh &gt; runner.log 2&gt;&amp;1 &amp;
+</code></pre>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://phantomma.top/post/debezium-outbox-pattern/" class="post-title gt-a-link">
+                    Debezium outbox pattern
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/PhantomMaa" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <script async defer src="https://tianji.phantom-lab.top/tracker.js" data-website-id="cmbpyo8l2006qjtlrb00mtn00"></script>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://phantomma.top/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

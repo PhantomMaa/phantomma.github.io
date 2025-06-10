@@ -1,0 +1,309 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>系统压力测试工具之 sysbench | 幻影笔记</title>
+
+<link rel="shortcut icon" href="https://phantomma.top/favicon.ico?v=1749526134625">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://phantomma.top/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            幻影笔记
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://phantomma.xyz/post/guan-yu" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1749526134625"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    系统压力测试工具之 sysbench
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2016-12-29 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="sysbench">sysbench</h2>
+<p>是一个模块化的、跨平台、多线程、流行的开源基准测试工具，主要用于评估测试各种不同系统参数下的数据库负载情况</p>
+<p>安装<br>
+软件版本:  <code>sysbench-1.0.20-6.el7.x86_64</code></p>
+<pre><code>curl -s https://packagecloud.io/install/repositories/akopytov/sysbench/script.rpm.sh | sudo bash
+yum -y install sysbench
+</code></pre>
+<h3 id="命令选项">命令选项</h3>
+<p>sysbench --help</p>
+<pre><code>--time  # 压测时间
+--threads  # 压测线程数
+--events  # 请求数, 0 无限制
+--rate    # 请求速率, 0 无限制
+--tables  # 压测表数量
+--table_size # 压测的单表大小,单位行
+prepare   # 准备测试数据
+run        # 开始压测
+cleanup  # 清除压测数据
+report-interval # 每多少秒钟报告一次测试结果
+</code></pre>
+<h3 id="file-io-压测">File IO 压测</h3>
+<pre><code># 查看 fileio 测试模块下的帮助信息
+sysbench fileio help
+# 准备测试数据, 生成多个测试文件
+sysbench fileio --file-total-size=5G prepare
+# 运行测试
+sysbench fileio --file-total-size=5G --file-test-mode=rndrw --time=30 --events=0 run
+# 清除测试数据
+sysbench fileio --file-total-size=5G cleanup
+</code></pre>
+<p>测试结果如下:</p>
+<pre><code>sysbench 1.0.20 (using bundled LuaJIT 2.1.0-beta2)
+
+Running the test with following options:
+Number of threads: 1
+Initializing random number generator from current time
+
+Extra file open flags: (none)
+128 files, 40MiB each
+5GiB total file size
+Block size 16KiB
+Number of IO requests: 0
+Read/Write ratio for combined random IO test: 1.50
+Periodic FSYNC enabled, calling fsync() each 100 requests.
+Calling fsync() at the end of test, Enabled.
+Using synchronous I/O mode
+Doing random r/w test
+Initializing worker threads...
+
+Threads started!
+
+File operations:    # 磁盘io操作
+    reads/s:                      47.68
+    writes/s:                     31.79
+    fsyncs/s:                     104.27
+Throughput: # 磁盘吞吐量
+    read, MiB/s:                  0.75
+    written, MiB/s:               0.50
+General statistics: # 测试时间30s, 总请求数 5421
+    total time:                          30.1950s
+    total number of events:              5421
+Latency (ms):   # 延迟
+         min:                                    0.01
+         avg:                                    5.53
+         max:                                  181.94
+         95th percentile:                       20.74
+         sum:                                29988.08
+Threads fairness:
+    events (avg/stddev):           5421.0000/0.00
+    execution time (avg/stddev):   29.9881/0.00
+</code></pre>
+<h3 id="mysql-压测">MySQL 压测</h3>
+<p>读写测试: 3 个表、每个表 1000 行，测试时间 120s, 请求数及请求频率无限制，12 个线程 首次测试 准备测试数据</p>
+<pre><code>sysbench --test=/usr/share/sysbench/oltp_read_write.lua \
+--mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=root --mysql-password=root \
+--mysql-db=db01 --db-driver=mysql --report-interval=30 \
+--time=120 --threads=12 --events=0 --rate=0 --table_size=1000 --tables=3 \
+prepare
+
+# 输出如下
+Creating table 'sbtest3'...
+Creating table 'sbtest1'...
+Creating table 'sbtest2'...
+Inserting 1000 records into 'sbtest3'
+Inserting 1000 records into 'sbtest2'
+Inserting 1000 records into 'sbtest1'
+Creating a secondary index on 'sbtest1'...
+Creating a secondary index on 'sbtest2'...
+Creating a secondary index on 'sbtest3'...
+</code></pre>
+<h3 id="开始压测">开始压测</h3>
+<pre><code>sysbench --test=/usr/share/sysbench/oltp_read_write.lua \
+--mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=root --mysql-password=root \
+--mysql-db=db01 --db-driver=mysql --report-interval=30 \
+--time=120 --threads=12 --events=0 --rate=0 --table_size=1000 --tables=3 \
+run
+
+# 输出如下
+[ 30s ] thds: 12 tps: 15.73 qps: 326.69 (r/w/o: 230.50/63.99/32.20) lat (ms,95%): 1771.29 err/s: 0.33 reconn/s: 0.00
+[ 60s ] thds: 12 tps: 17.90 qps: 366.32 (r/w/o: 257.61/72.40/36.30) lat (ms,95%): 1678.14 err/s: 0.50 reconn/s: 0.00
+[ 90s ] thds: 12 tps: 17.13 qps: 345.72 (r/w/o: 242.66/68.60/34.47) lat (ms,95%): 1618.78 err/s: 0.20 reconn/s: 0.00
+[ 120s ] thds: 12 tps: 17.37 qps: 356.20 (r/w/o: 250.13/70.83/35.23) lat (ms,95%): 1561.52 err/s: 0.50 reconn/s: 0.00
+SQL statistics:
+    queries performed:
+        read:                            29428
+        write:                           8292
+        other:                           4158
+        total:                           41878
+    transactions:                        2056   (17.04 per sec.)
+    queries:                             41878  (346.99 per sec.)
+    ignored errors:                      46     (0.38 per sec.)
+    reconnects:                          0      (0.00 per sec.)
+
+General statistics:
+    total time:                          120.6877s
+    total number of events:              2056
+
+Latency (ms):
+         min:                                  132.72
+         avg:                                  702.06
+         max:                                 3397.70
+         95th percentile:                     1678.14
+         sum:                              1443438.80
+
+Threads fairness:
+    events (avg/stddev):           171.3333/9.13
+    execution time (avg/stddev):   120.2866/0.21
+</code></pre>
+<h3 id="清除压测数据">清除压测数据</h3>
+<pre><code>sysbench --test=/usr/share/sysbench/oltp_read_write.lua \
+--mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=root --mysql-password=root \
+--mysql-db=db01 --db-driver=mysql --report-interval=30 \
+--time=120 --threads=12 --events=0 --rate=0 --table_size=1000 --tables=3 \
+cleanup
+</code></pre>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://phantomma.top/post/frp-nei-wang-chuan-tou/" class="post-title gt-a-link">
+                    frp 内网穿透
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/PhantomMaa" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <script async defer src="https://tianji.phantom-lab.top/tracker.js" data-website-id="cmbpyo8l2006qjtlrb00mtn00"></script>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://phantomma.top/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

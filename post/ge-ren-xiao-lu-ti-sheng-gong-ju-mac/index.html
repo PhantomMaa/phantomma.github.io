@@ -1,0 +1,358 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>个人效率提升工具（Mac） | 幻影笔记</title>
+
+<link rel="shortcut icon" href="https://phantomma.top/favicon.ico?v=1749526134625">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://phantomma.top/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            幻影笔记
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://phantomma.xyz/post/guan-yu" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1749526134625"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    个人效率提升工具（Mac）
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2018-11-01 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="mac个人软件">Mac个人软件</h2>
+<h3 id="raycast">Raycast</h3>
+<ul>
+<li>对于没有使用过Alfred的同学，可以考虑直接使用Raycast</li>
+<li>rust编写，效率更高</li>
+<li>类Alfred的搜索功能，除了搜索（文件、app、日历、代办登），还集成了很多其它小功能，如：剪贴板历史、计算器。。</li>
+</ul>
+<h3 id="xnip">Xnip</h3>
+<ul>
+<li>截图并贴图</li>
+<li>免费版基本够用，轻量不占资源</li>
+</ul>
+<h3 id="the-archiver">The archiver</h3>
+<ul>
+<li>轻量干净的解压缩软件</li>
+</ul>
+<h3 id="updf">UPDF</h3>
+<ul>
+<li>现代强大的pdf阅读软件</li>
+</ul>
+<h3 id="iterm">iTerm</h3>
+<ul>
+<li>全彩色终端</li>
+<li>掌握快速唤起、隐藏终端</li>
+<li>split新的窗口，以及在之间切换</li>
+<li>终端增强：OhMyZsh + PowerLevel10K</li>
+<li>安装zsh插件<pre><code>plugins=(
+    git
+    zsh-completions 
+    zsh-autosuggestions 
+    zsh-syntax-highlighting
+)
+</code></pre>
+</li>
+</ul>
+<h3 id="maccy">Maccy</h3>
+<ul>
+<li>非常轻量的剪贴板历史工具。只保存纯文本</li>
+<li>有了Raycast，就没有必要了</li>
+</ul>
+<h3 id="runcat">RunCat</h3>
+<ul>
+<li>mac菜单栏工具，一只奔跑的cat，显示一些系统运行状态</li>
+</ul>
+<h3 id="stats">Stats</h3>
+<ul>
+<li>免费软件，功能和界面基本做到了付费软件 iStatMenu一致的水平</li>
+<li>比上面的runcat功能强大，不止cpu，内存、网络、磁盘都可以监控显示</li>
+</ul>
+<h3 id="bob翻译">Bob翻译</h3>
+<ul>
+<li>划词翻译</li>
+<li>可设置第三方翻译服务</li>
+<li>OCR识别</li>
+</ul>
+<h3 id="motrix">motrix</h3>
+<ul>
+<li>下载工具</li>
+<li>支持多线程，BT下载</li>
+</ul>
+<h3 id="xmind">XMind</h3>
+<ul>
+<li>本地思维导图，免费版基本够用</li>
+</ul>
+<h3 id="alttab">AltTab</h3>
+<ul>
+<li>cmd + Tab 窗口切换之外的一个补充工具</li>
+<li>可以在同一app下的多个窗口之间切换</li>
+</ul>
+<h3 id="gridea">Gridea</h3>
+<ul>
+<li>静态博客app。自带一个客户端，可以直接在app内编辑blog，提供了一个markdown编辑器，还算好用</li>
+<li>支持上传图片到本地git仓库，渲染时自动替换为相对路径</li>
+<li>自动github同步功能，写完一键同步至github page</li>
+<li>不过最近停止更新了。软件包还是intel的打包</li>
+</ul>
+<h3 id="xnip-2">Xnip</h3>
+<ul>
+<li>试用下来，满足我当前需求的最佳截图软件。比较，iShot、Paste等，更原生，且轻量</li>
+<li>具备钉图功能，图标标注也不错</li>
+<li>重要的是，appstore上免费</li>
+</ul>
+<h3 id="clashx">ClashX</h3>
+<ul>
+<li>科学上网</li>
+<li>结合fastlink梯子。https://v02.fl-aff.com/auth/register?code=5X1E</li>
+<li><a href="https://macwk.cn/app/529.html">体验下来，最好的版本</a></li>
+</ul>
+<h3 id="shadowsocketsx-ng">ShadowSocketsX-NG</h3>
+<ul>
+<li>同上</li>
+<li>比叫轻量，界面更像mac软件</li>
+</ul>
+<h3 id="hiddenbar">HiddenBar</h3>
+<ul>
+<li>macbook 刘海屏，拯救状态栏被刘海隐藏的图标</li>
+</ul>
+<h3 id="bartender">Bartender</h3>
+<ul>
+<li>同上，功能更强大一些。可以把隐藏图标单独显示成一栏</li>
+</ul>
+<h3 id="cheatsheet">CheatSheet</h3>
+<ul>
+<li>快捷键作弊表</li>
+<li>长按cmd键，显示当前应用的快捷键列表</li>
+</ul>
+<h3 id="updf-2">UPDF</h3>
+<ul>
+<li>国产pdf软件，功能是真的强大</li>
+<li>编辑功能，ocr识别等</li>
+</ul>
+<h3 id="notion">Notion</h3>
+<ul>
+<li>支持markdown语法，同时编辑时可见即所得</li>
+<li>支持图片的大小调整，比较适合码农写技术文章</li>
+<li>方便在文档里编辑表格。这对原生markdown在表格方便的弱鸡功能，做了很大的增强</li>
+</ul>
+<h3 id="omnigraffle">OmniGraffle</h3>
+<ul>
+<li>很适合画软件架构图</li>
+<li>提供丰富的模版和内置图形</li>
+</ul>
+<h3 id="shortcutdetective">ShortCutDetective</h3>
+<ul>
+<li>快捷键冲突检测工具</li>
+</ul>
+<h3 id="silicon">Silicon</h3>
+<ul>
+<li>扫描电脑上的app，显示是否针对apple m芯片单独编译的</li>
+<li><a href="https://www.macrumors.com/how-to/tell-apps-optimized-for-m1-apple-silicon-macs/">How to Tell Which Mac Apps Are Optimized for Apple Silicon</a></li>
+</ul>
+<h2 id="brew-安装的工具">brew 安装的工具</h2>
+<ul>
+<li>首先是安装 homebrew</li>
+</ul>
+<h3 id="通过brew-安装的工具">通过brew 安装的工具</h3>
+<pre><code>brew install wget
+brew install jq
+brew install git
+brew install tree
+brew install jenv
+brew install maven
+</code></pre>
+<h2 id="开发工具">开发工具</h2>
+<h3 id="jdk">JDK</h3>
+<ul>
+<li>推荐Oracle JDK</li>
+</ul>
+<h3 id="jenv">jenv</h3>
+<p>管理多个jdk版本的命令行工具</p>
+<h3 id="idea">IDEA</h3>
+<ul>
+<li>java IDE</li>
+</ul>
+<h3 id="vs-code">VS Code</h3>
+<ul>
+<li>轻量IDE，可装各种插件，支持各种语言</li>
+</ul>
+<h3 id="orbstack">OrbStack</h3>
+<ul>
+<li>可以创建vm</li>
+<li>可以创建docker</li>
+<li>自带一个k8s集群</li>
+<li>虚拟化方案针对mac平台专门优化，不想DockerDesktop底层以来一个linux的vm</li>
+</ul>
+<h3 id="lens">Lens</h3>
+<ul>
+<li>功能强大的k8s ide</li>
+<li>能够显示所有k8s内置资源类型，以及自定义CRDs</li>
+<li>不过也有个小bug。使用长时间后，肯跟会堵塞网络，导致浏览器也无法上网。解决办法，重启应用 就好了</li>
+</ul>
+<h2 id="saas服务">SaaS服务</h2>
+<h3 id="poe">Poe</h3>
+<ul>
+<li>quora提供的聚合各种AI机器人的网站，也支持ChatGPT机器人，速度比较块，也不想OpenAI对使用者IP region限制比较严格</li>
+</ul>
+<h3 id="ai论文阅读">AI论文阅读</h3>
+<ul>
+<li>Humata：对输入的论文理解表现是AI中比较出色的，缺点是用多了就得付费</li>
+<li>ChatPDF：免费的PDF学习AI，理解力比Humata差点，不过完全免费</li>
+</ul>
+<hr>
+<p>推荐一个mac软件网站：https://haxmac.cc/bartender-crack-mac/</p>
+<p>。。。TODO</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://phantomma.top/post/mysql-binlog-yuan-ma-xue-xi/" class="post-title gt-a-link">
+                    MySQL Binlog 源码学习
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/PhantomMaa" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <script async defer src="https://tianji.phantom-lab.top/tracker.js" data-website-id="cmbpyo8l2006qjtlrb00mtn00"></script>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://phantomma.top/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
